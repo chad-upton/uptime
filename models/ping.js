@@ -4,7 +4,7 @@ var Schema   = mongoose.Schema;
 var Ping = new Schema({
   timestamp    : { type: Date, default: Date.now },
   isUp         : Boolean,  // false if ping returned a non-OK status code or timed out
-  isResponsive : Boolean,  // true if the ping time is less than the check max time 
+  isResponsive : Boolean,  // true if the ping time is less than the check max time
   time         : Number,
   check        : { type: Schema.ObjectId, ref: 'Check' },
   tags         : [String],
@@ -31,6 +31,7 @@ Ping.methods.setDetails = function(details) {
 Ping.statics.createForCheck = function(status, timestamp, time, check, monitorName, error, details, callback) {
   timestamp = timestamp || new Date();
   timestamp = timestamp instanceof Date ? timestamp : new Date(parseInt(timestamp, 10));
+
   var ping = new this();
   ping.timestamp = timestamp;
   ping.isUp = status;
@@ -53,7 +54,7 @@ Ping.statics.createForCheck = function(status, timestamp, time, check, monitorNa
   ping.owner = check.owner;
   ping.save(function(err1) {
     if (err1) return callback(err1);
-    check.setLastTest(status, timestamp, error);
+    check.setLastTest(status, timestamp, error); // will create CheckEvent if necessary
     check.save(function(err2) {
       if (err2) return callback(err2);
       callback(null, ping);
