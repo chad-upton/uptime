@@ -320,6 +320,7 @@ Check.methods.populateFromDirtyCheck = function(dirtyCheck, pollerCollection) {
   this.isPaused = dirtyCheck.isPaused || this.isPaused;
   this.alertTreshold = dirtyCheck.alertTreshold || this.alertTreshold;
   this.interval = dirtyCheck.interval * 1000 || this.interval;
+  this.pollerParams = dirtyCheck.pollerParams || this.pollerParams;
 
   if (typeof(dirtyCheck.name) !== 'undefined' && dirtyCheck.name.length) {
       this.name = dirtyCheck.name;
