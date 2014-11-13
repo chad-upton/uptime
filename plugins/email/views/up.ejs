@@ -6,7 +6,7 @@ and after <%= moment.duration(checkEvent.downtime).humanize() %> of downtime,
 [Up] Check "<%= check.name %>" is now up
 On <%= moment(checkEvent.timestamp).format('LLLL') %>,
 <% }%>
-a test on URL "<%= check.url %>" responded correctly.
+a test on URL "<%- check.url %>" responded correctly.
 
 <% include details %>
 <% include footer %>
