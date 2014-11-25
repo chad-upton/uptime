@@ -1,8 +1,8 @@
 url: 'http://localhost:8082'
 
 mongodb:
-  server: REPLACE_WITH_MONGO_ENDPOINT
-  database: REPLACE_WITH_MONGO_DATABASE
+  server: REPLACE_WITH_MONGO_ENDPOINT   # localhost
+  database: REPLACE_WITH_MONGO_DATABASE # uptime
   user: REPLACE_WITH_MONGO_USER
   password: REPLACE_WITH_MONGO_PWD
   connectionString:       # alternative to setting server, database, user and password separately
