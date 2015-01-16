@@ -17,30 +17,30 @@ var page = {};
     <button type="submit" class="btn btn-danger pull-right" name="delete">Delete</button>
   </form>
 </div>
-<h1>
-  Tag "<%= tag.name %>"
+<h1 class="page-header">
+  <i class="fa fa-tag"></i> Tag "<%= tag.name %>"
 </h1>
 <div id="dateNavigationContainer">
   <div id="dateNavigation">
     <div class="row">
-      <div class="span2"></div>
-      <div class="span10">
+      <div class="col-sm-2"></div>
+      <div class="col-sm-10">
         <div class="title"></div>
         <div class="timeline"></div>
       </div>
     </div>
     <div class="row">
-      <div class="span2">
+      <div class="col-sm-2">
         <ul class="btn-group zoom"></ul>
       </div>
-      <div class="span10">
+      <div class="col-sm-10">
         <div class="periods"></div>
       </div>
     </div>
   </div>
 </div>
 <div id="sectionList" class="row">
-  <div class="span2">
+  <div class="col-sm-2">
     <ul id="secondaryNav" class="nav nav-tabs nav-stacked">
       <li><a href="#availability">Availability<i class="icon-chevron-right"></i><br/><strong class="availability"></strong>%</a></li>
       <li><a href="#events">Downtime<i class="icon-chevron-right"></i><br/><strong class="downtime"></strong></a></li>
@@ -50,26 +50,26 @@ var page = {};
       <li><a href="#data">Data<i class="icon-chevron-right"></i></a></li>
     </ul>
   </div>
-  <div class="span10">
-    <section id="availability">
+  <div class="col-sm-10">
+    <div  class="panel panel-default" id="availability">
     <%- partial('_availability') %>
-    </section>
-    <section id="events">
+    </div>
+    <div  class="panel panel-default" id="events">
     <h2>Downtime</h2>
     <%- partial('_events', { url: '/api/tags/' + encodeURIComponent(tag.name) + '/events', route: route }) %>
-    </section>
-    <section id="responseTime">
+    </div>
+    <div  class="panel panel-default" id="responseTime">
     <%- partial('_responseTime') %>
-    </section>
-    <section id="responsiveness">
+    </div>
+    <div  class="panel panel-default" id="responsiveness">
     <%- partial('_responsiveness') %>
-    </section>
-    <section id="checks">
+    </div>
+    <div  class="panel panel-default" id="checks">
     <%- partial('_checks', { url: '/api/tags/' + encodeURIComponent(tag.name) + '/checks/', route: route } ) %>
-    </section>
-    <section id="data">
+    </div>
+    <div  class="panel panel-default" id="data">
     <%- partial('_data', { url: '/api/tags/' + encodeURIComponent(tag.name) + '/stats/', route: route } ) %>
-    </section>
+    </div>
   </div>
 </div>
 <script>

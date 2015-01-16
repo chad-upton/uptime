@@ -1,3 +1,11 @@
+* {
+    font-family: 'Microsoft Yahei';
+}
+
+body {
+  padding-top: 50px;
+}
+
 h1, h2, h3 {
   font-weight: normal;
 }
@@ -246,29 +254,29 @@ i.icon-chevron-right {
   margin-left: 29px;
   height: 22px;
 }
-.btn-small.month, .btn-small.day, .btn-small.hour, .btn-small.quarter {
-  padding-right: 0;
-  padding-left: 0;
+.btn-sm.month, .btn-sm.day, .btn-sm.hour, .btn-sm.quarter {
+  padding-right: 1px;
+  padding-left: 1px;
 }
-.btn.btn-small.month {
+.btn.btn-sm.month {
   width: 61px;
 }
-.btn.btn-small.day.nb31 {
+.btn.btn-sm.day.nb31 {
   width: 24px;
 }
-.btn.btn-small.day.nb30 {
+.btn.btn-sm.day.nb30 {
   width: 25px;
 }
-.btn.btn-small.day.nb29 {
+.btn.btn-sm.day.nb29 {
   width: 26px;
 }
-.btn.btn-small.day.nb28 {
+.btn.btn-sm.day.nb28 {
   width: 27px;
 }
-.btn.btn-small.hour {
+.btn.btn-sm.hour {
   width: 31px;
 }
-.btn.btn-small.tenminutes {
+.btn.btn-sm.tenminutes {
   width: 120px;
 }
 ul.nav-tabs li span {
