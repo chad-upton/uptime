@@ -1,13 +1,16 @@
 <script src="<%= route %>/javascripts/jquery.tablesorter.min.js"></script>
 <script src="<%= route %>/javascripts/uptimeBar.js"></script>
 <script src="<%= route %>/javascripts/ejs.min.js"></script>
-<h1 class="page-header"><i class="fa fa-tasks"></i> Checks <small class="pull-right">last 24 hours</small></h1>
+<h1 class="page-header">
+	<i class="fa fa-tasks"></i> Checks 
+	<div class="pull-right">
+		<small>last 24 hours</small>&nbsp;&nbsp;
+		<a class="btn btn-primary" href="<%= route %>/checks/new">Create check</a>
+	</div>
+</h1>
 <% if (info.length) { %>
 <div class="alert alert-success"><%= info %></div>
 <% } %>
-<div style="text-align:right">
-  <a class="btn btn-primary" href="<%= route %>/checks/new">Create check</a>
-</div>
 <table class="table" id="checks">
   <thead>
 	<tr>
