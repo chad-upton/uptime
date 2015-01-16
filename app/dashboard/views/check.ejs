@@ -11,11 +11,11 @@ var ejs = require('ejs');
 ejs.open = '{{';
 ejs.close = '}}';
 </script>
-<div style="float: right;">
-  <span id="check_24h"></span>
-  <a href="<%= route %>/checks/<%= check._id %>/edit" class="btn btn-primary">Edit</a>
-</div>
 <h1 class="page-header">
+  <div class="pull-right">
+    <small id="check_24h"></small>
+    <a href="<%= route %>/checks/<%= check._id %>/edit" class="btn btn-primary">Edit</a>
+  </div>
   <i class="fa fa-check"></i> Check "<%= check.name %>"
   <a href="<%= check.url %>" target="_blank"><img src="<%= route %>/images/external-link-ltr-icon.png"></a>
 </h1>
