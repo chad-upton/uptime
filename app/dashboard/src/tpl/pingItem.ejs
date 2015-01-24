@@ -1,0 +1,14 @@
+<tr class="<%= !ping.isUp ? 'text-danger' : !ping.isResponsive ? 'text-warning' : '' %>">
+    <td title="<%= new Date(ping.timestamp) %>"><%= moment(ping.timestamp).format('LLLL') %></td>
+    <td>
+        <span class="label <%= (ping.isUp ? 'label-success' : 'label-danger') %>"><%= (ping.isUp ? 'Up' : 'Down') %></span>
+        <% if (ping.isUp && !ping.isResponsive) { %><span class="label label-warning">Slow</span><% } %>
+    </td>
+    <td><%= parseInt(ping.time) %>ms</td>
+    <td>
+        <% if (pingHasValidUrl(ping)) { %>
+            <a href="<%= ping.details.url %>">See report</a>
+        <% } %>
+    </td>
+    <td class="error"><%= ping.error || '' %></td>
+</tr>

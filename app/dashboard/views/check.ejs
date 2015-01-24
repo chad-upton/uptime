@@ -40,14 +40,28 @@
 
 <div id="sectionList" class="row">
     <div class="col-md-2">
-        <ul id="secondaryNav" class="nav nav-pills nav-stacked">
-            <li><a href="#availability" title="Percentage of uptime over the period">Availability<i class="icon-chevron-right"></i><br/><strong class="availability"></strong>%</a></li>
-            <li><a href="#events">Downtime<i class="icon-chevron-right"></i><br/><strong class="downtime"></strong></a></li>
-            <li><a href="#responseTime" title="Average response time over the period">Response Time<i class="icon-chevron-right"></i><br/><strong class="avgRespTime"></strong>ms</a></li>
-            <li><a href="#responsiveness" title="Percentage of pings above slow threshold over the period">Responsiveness<i class="icon-chevron-right"></i><br/><strong class="responsiveness"></strong>%</a></li>
-            <li><a href="#data">Data<i class="icon-chevron-right"></i></a></li>
+        <ul id="secondaryNav" class="nav nav-stacked">
+            <li>
+                <a href="#availability" title="Percentage of uptime over the period">Availability<br/>
+                    <strong class="availability"></strong>%
+                </a>
+            </li>
+            <li>
+                <a href="#events">Downtime<br/><strong class="downtime"></strong></a></li>
+            <li>
+                <a href="#responseTime" title="Average response time over the period">Response Time<br/>
+                    <strong class="avgRespTime"></strong>ms
+                </a>
+            </li>
+            <li>
+                <a href="#responsiveness" title="Percentage of pings above slow threshold over the period">Responsiveness<br/>
+                    <strong class="responsiveness"></strong>%</a></li>
+            <li>
+                <a href="#data">Data</a>
+            </li>
         </ul>
     </div>
+    
     <div class="col-md-10">
         <section id="availability">
         <%- partial('_availability') %>

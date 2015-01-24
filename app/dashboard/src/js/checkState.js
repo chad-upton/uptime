@@ -13,24 +13,21 @@ var updateCheckState = function(check) {
     if (check.isPaused) {
       // paused
       status.label = 'info';
-      status.color = 'blue';
       status.text = 'paused';
       status.date = check.lastTested;
     } else if (check.isUp) {
       // up
       status.label = 'success';
-      status.color = 'green';
       status.text = 'up';
       status.date = check.lastChanged;
     } else {
       // down
       status.label = 'danger';
-      status.color = 'red';
       status.text = 'down';
       status.date = check.lastChanged;
     }
     html += '<span class="label label-' + status.label + '">' +  status.text +'</span>'
-    html += '<span class="' + status.color + '"> for <span title="' + new Date(status.date) + '">' + moment(status.date).fromNow(true) + '</span></span>';
+    html += '<span class="text-' + status.label + '"> for <span title="' + new Date(status.date) + '">' + moment(status.date).fromNow(true) + '</span></span>';
   }
   $('#check_24h').html(html);
 }

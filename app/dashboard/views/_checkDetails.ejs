@@ -44,8 +44,8 @@
             <label for="inputPollingInterval">Polling Interval</label>
             <div class="input-group">
                 <% if (check.lastTested) { %>
-                <span class="input-group-addon">
-                    <a name="pause"><i class="fa fa-<%= check.isPaused ? 'play' : 'pause' %>"></i></a>
+                <span class="input-group-addon btn-pause-wrapper">
+                    <a name="pause" class="btn btn-default"><i class="fa fa-<%= check.isPaused ? 'play' : 'pause' %>"></i></a>
                 </span>
                 <% } %>
                 <input 

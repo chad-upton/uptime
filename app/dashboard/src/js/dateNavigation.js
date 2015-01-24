@@ -147,21 +147,21 @@ DateNavigation.prototype.redrawTitle = function() {
             break;
         case 'month':
             title += momentForDate.format('MMMM');
-            title += ' <div class="btn-group btn-group-xs"><a class="btn btn-link" data-type="year" data-date="' + this.interval.date + '">';
+            title += ' <a class="btn btn-link" data-type="year" data-date="' + this.interval.date + '">';
             title += momentForDate.year();
-            title += '</a></div>';
+            title += '</a>';
             break;
         case 'day':
             title += momentForDate.format('dddd ');
-            title += '<div class="btn-group btn-group-xs"><a class="btn btn-link" data-type="month" data-date="' + this.interval.date + '">';
+            title += '<a class="btn btn-link" data-type="month" data-date="' + this.interval.date + '">';
             title += momentForDate.format('MMMM');
-            title += '</a></div> ';
+            title += '</a> ';
             title += momentForDate.format('Do, YYYY');
             break;
         case 'hour':
-            title += '<div class="btn-group btn-group-xs"><a class="btn btn-link" data-type="day" data-date="' + this.interval.date + '">';
+            title += '<a class="btn btn-link" data-type="day" data-date="' + this.interval.date + '">';
             title += momentForDate.format('dddd MMMM Do');
-            title += '</a></div>, ';
+            title += '</a>, ';
             title += momentForDate.clone().startOf('hour').format('ha') + ' to ' + momentForDate.clone().endOf('hour').format('h:mma');
     }
     $('#dateNavigation .title').html(title);
