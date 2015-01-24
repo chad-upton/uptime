@@ -2,7 +2,7 @@
  * Overriding some bootstrap styles
  */
 // Disable rounded corner
-input, .btn, .form-control, .input-group-addon, .dropdown-menu {
+input, .btn, .form-control, .input-group-addon, .dropdown-menu, .alert {
     border-radius: 0 !important;
 }
 
