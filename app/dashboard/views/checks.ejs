@@ -71,5 +71,25 @@ jQuery(function($) {
         $('h1 + div.alert').slideUp();
     }, 5000);
 
+
+    // enable ajax-delete a check
+    $('table#checks').on('click', '.btn-delete', function(e) {
+        e.preventDefault();
+
+        if (!confirm("This will delete the check and related pings and stats.\nAre you sure?")) return false;
+
+        $a = $(this);
+
+        // make a post with method=delete
+        $.post($a.attr('href'), {
+            _method: 'delete'
+        }, function(result) {
+            // just remove the row
+            $a.parents('tr').fadeOut(function() {
+                $(this).remove();
+            });
+        });
+    });
+
 });
 </script>

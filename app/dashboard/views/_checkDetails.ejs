@@ -1,94 +1,111 @@
 <div class="tab-pane" id="admin">
-    <form id="check_form" method="post" action="<%= route %>/checks<%= check.isNew ? '' : '/' + check._id %>">
+    <form id="check_form" method="post" action="<%= route %>/checks<%= check.isNew ? '' : '/' + check._id %>" class="form-horizontal">
         <input type="hidden" name="_method" value="<%= (check.isNew) ? 'post' : 'put' %>" />
 
         <div class="form-group">
-            <label for="inputUrl">URL</label>
-            <div class="input-group">
+            <label for="inputUrl" class="col-sm-2 control-label">URL</label>
+            <div class="col-sm-10">
+                <div class="input-group">
+                    <input 
+                        type="text" 
+                        id="inputUrl"
+                        name="check[url]"
+                        value="<%= check.url || '' %>" 
+                        class="form-control"
+                        placeholder="http://www.example.com"
+                        requried 
+                    />
+                    <span class="input-group-addon"><a href="<%= check.url ? check.url : '' %>" target="_blank"><i class="fa fa-external-link"></i></a></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputType" class="col-sm-2 control-label">Type</label>
+
+            <div class="col-sm-2">
+                <select name="check[type]" value="<% check.type || '' %>" class="form-control" id="inputType">
+                    <option value="">Auto Detect</option>
+                    <% pollerCollection.getTypes().forEach(function(poller) { %>
+                    <option value="<%= poller %>" <% if (poller === check.type) { %> selected="true" <% } %>><%= poller %></option>
+                    <% }) %>
+                </select>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="inputName" class="col-sm-2 control-label">Name</label>
+
+            <div class="col-sm-10">
                 <input 
                     type="text" 
-                    id="inputUrl"
-                    name="check[url]"
-                    value="<%= check.url || '' %>" 
                     class="form-control"
-                    placeholder="http://www.example.com"
-                    requried 
+                    id="inputName" 
+                    name="check[name]" 
+                    value="<%= check.name || '' %>" 
+                    placeholder="Type a name here"
                 />
-                <span class="input-group-addon"><a href="<%= check.url ? check.url : '' %>" target="_blank"><i class="fa fa-external-link"></i></a></span>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="inputType">Type</label>
-            <select name="check[type]" value="<% check.type || '' %>" class="form-control" id="inputType">
-                <option value="">Auto Detect</option>
-                <% pollerCollection.getTypes().forEach(function(poller) { %>
-                <option value="<%= poller %>" <% if (poller === check.type) { %> selected="true" <% } %>><%= poller %></option>
-                <% }) %>
-            </select>
-        </div>
+            <label for="inputPollingInterval" class="col-sm-2 control-label">Polling Interval</label>
 
-        <div class="form-group">
-            <label for="inputName">Name</label>
-            <input 
-                type="text" 
-                class="form-control"
-                id="inputName" 
-                name="check[name]" 
-                value="<%= check.name || '' %>" 
-                placeholder="Type a name here"
-            />
-        </div>
-
-        <div class="form-group">
-            <label for="inputPollingInterval">Polling Interval</label>
-            <div class="input-group">
-                <% if (check.lastTested) { %>
-                <span class="input-group-addon btn-pause-wrapper">
-                    <a name="pause" class="btn btn-default"><i class="fa fa-<%= check.isPaused ? 'play' : 'pause' %>"></i></a>
-                </span>
-                <% } %>
-                <input 
-                    type="number" 
-                    min="60"
-                    step="10"
-                    id="inputPollingInterval"
-                    name="check[interval]"
-                    value="<%= (check.interval / 1000).toFixed() %>"
-                    class="form-control"
-                />
-                <span class="input-group-addon">s</span>
+            <div class="col-sm-2">
+                <div class="input-group">
+                    <% if (check.lastTested) { %>
+                    <span class="input-group-addon btn-pause-wrapper">
+                        <a name="pause" class="btn btn-default"><i class="fa fa-<%= check.isPaused ? 'play' : 'pause' %>"></i></a>
+                    </span>
+                    <% } %>
+                    <input 
+                        type="number" 
+                        min="60"
+                        step="10"
+                        id="inputPollingInterval"
+                        name="check[interval]"
+                        value="<%= (check.interval / 1000).toFixed() %>"
+                        class="form-control"
+                    />
+                    <span class="input-group-addon">s</span>
+                </div>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="inputSlowThreshold">Slow Threshold</label>
-            <div class="input-group">
-                <input 
-                    type="number" 
-                    min="100"
-                    step="100"
-                    id="inputSlowThreshold"
-                    name="check[maxTime]" 
-                    value="<%= check.maxTime %>" 
-                    class="form-control"
-                />
-                <span class="input-group-addon">ms</span>
+            <label for="inputSlowThreshold" class="col-sm-2 control-label">Slow Threshold</label>
+            
+            <div class="col-sm-2">
+                <div class="input-group">
+                    <input 
+                        type="number" 
+                        min="100"
+                        step="100"
+                        id="inputSlowThreshold"
+                        name="check[maxTime]" 
+                        value="<%= check.maxTime %>" 
+                        class="form-control"
+                    />
+                    <span class="input-group-addon">ms</span>
+                </div>
             </div>
         </div>
 
         <div class="form-group">
-            <label for="inputAlertThreshold">Alert Threshold</label>
-            <div class="input-group">
-                <input 
-                    type="number"
-                    min="1"
-                    id="inputAlertThreshold"
-                    name="check[alertTreshold]" 
-                    value="<%= check.alertTreshold %>" 
-                    class="form-control"
-                />
-                <span class="input-group-addon">failed ping(s)</span>
+            <label for="inputAlertThreshold" class="col-sm-2 control-label">Alert Threshold</label>
+
+            <div class="col-sm-2">
+                <div class="input-group">
+                    <input 
+                        type="number"
+                        min="1"
+                        id="inputAlertThreshold"
+                        name="check[alertTreshold]" 
+                        value="<%= check.alertTreshold %>" 
+                        class="form-control"
+                    />
+                    <span class="input-group-addon">failed ping(s)</span>
+                </div>
             </div>
         </div>
 
@@ -97,32 +114,41 @@
         </section>
 
         <div class="form-group">
-            <label for="textareaTags">Tags</label>
-            <textarea 
-                name="check[tags]" 
-                id="textareaTags"
-                cols="30"
-                rows="2"
-                class="form-control"><%= check.tags.join(', ') %></textarea>
+            <label for="textareaTags" class="col-sm-2 control-label">Tags</label>
+
+            <div class="col-sm-10">
+                <textarea 
+                    name="check[tags]" 
+                    id="textareaTags"
+                    cols="30"
+                    rows="2"
+                    class="form-control"><%= check.tags.join(', ') %></textarea>
+            </div>
         </div>
 
         <% if (check.lastTested) { %>
-        <p class="control-label">Last edited on:
-            <span class="uneditable-input"><%= check.lastTested.getTime() %></span>
-        </p>
+        <div class="form-group">
+            <label class="col-sm-2 control-label">Last edited on</label>
+            <div class="col-sm-10 uneditable-input"><%= check.lastTested.getTime() %>" /></div>
+        </div>
         <% } %>
 
-        <div class="form-actions">
-            <% if (check.isNew) { %>
-            <button type="submit" class="btn btn-primary">Save</button>
-            <button type="submit" name="saveandadd" value="true" class="btn btn-success">Save &amp; Add</button>
-            <a class="btn btn-default" href="<%= route %>/checks">Cancel</a>
-            <% } else { %>
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a class="btn btn-default" href="<%= route %>/checks/<%= check._id %>">Cancel</a>
-            <button type="submit" class="btn btn-danger pull-right" name="delete">Delete</button>
-            <% } %>
+        <div class="form-group">
+            <label class="col-sm-2 control-label"></label>
+
+            <div class="form-actions col-sm-10">
+                <% if (check.isNew) { %>
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="submit" name="saveandadd" value="true" class="btn btn-success">Save &amp; Add</button>
+                <a class="btn btn-default" href="<%= route %>/checks">Cancel</a>
+                <% } else { %>
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a class="btn btn-default" href="<%= route %>/checks/<%= check._id %>">Cancel</a>
+                <button type="submit" class="btn btn-danger pull-right" name="delete">Delete</button>
+                <% } %>
+            </div>
         </div>
+        
     </form>
 </div>
 

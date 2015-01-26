@@ -239,6 +239,8 @@ table.ping .error {
 
 #dateNavigationContainer {
     min-height: 88px;
+
+    text-align: center; // for the zoom buttons to be centered
 }
 
 #dateNavigation.affix {
@@ -340,6 +342,11 @@ ul.nav-tabs li span {
 .uneditable-input {
     font-weight: normal;
     color: #737373;
+    padding-top: 6px;
+}
+
+form {
+    padding: 32px 0;
 }
 
 .form-actions {
@@ -382,7 +389,7 @@ li.event-item {
     width: 165px; 
 
     &.affix {
-        top: 91px;
+        top: 96px;
     }
 
     li {
@@ -416,4 +423,33 @@ li.event-item {
     a {
         border: 0;
     }
+}
+
+// the icons on page headings
+h1 {
+    position: relative;
+
+    > .faded  {
+        color: #aaa;    
+    }
+
+    .check-overview {
+        font-size: 13px;
+        position: absolute;
+        right: 0;
+        top: 0;
+
+        .label {
+            text-transform: uppercase;
+            font-size: 14px;
+            margin-right: 4px;
+        }
+    }
+
+    a.check-external-link {
+        display: inline-block;
+        font-size: 27px;
+        margin-left: 8px;
+    }
+    
 }

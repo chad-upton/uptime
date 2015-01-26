@@ -1,17 +1,11 @@
-<script>
-    var ejs = require('ejs');
-    ejs.open = '{{';
-    ejs.close = '}}';
-</script>
-
-<div style="float: right;">
-    <span id="check_24h"></span>
-    <a href="<%= route %>/checks/<%= check._id %>/edit" class="btn btn-primary">Edit</a>
-</div>
-
 <h1>
-    Check "<%= check.name %>"
-    <a href="<%= check.url %>" target="_blank"><i class="fa fa-external-link"></i></a>
+    <span class="faded">Check</span> <%= check.name %>
+    <a href="<%= check.url %>" class="check-external-link" target="_blank"><i class="fa fa-external-link"></i></a>
+
+    <div class="check-overview">
+        <span id="check_24h"></span>
+        <a href="<%= route %>/checks/<%= check._id %>/edit" class="btn btn-primary">Edit</a>
+    </div>
 </h1>
 
 <% if (info.length) { %>

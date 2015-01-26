@@ -61,7 +61,7 @@ gulp.task('js', function () {
  * @return {[type]}   [description]
  */
 gulp.task('ejs', function () {
-    gulp.src('./src/tpl/**/*.ejs')
+    theTask = gulp.src('./src/tpl/**/*.ejs')
         .pipe(ejs({
             client: true
         }))
@@ -94,7 +94,7 @@ gulp.task('watch', function () {
         gulp.start('js', cb);
     });
 
-    watch('./src/tpl/**/*.html', function (files, cb) {
+    watch('./src/tpl/**/*.ejs', function (files, cb) {
         gulp.start('ejs', cb);
     });
 });

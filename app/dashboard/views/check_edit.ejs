@@ -1,13 +1,16 @@
-<div style="float: right;">
-    <span id="check_24h"></span>
-</div>
-<h1>Edit check "<%= check.name %>"</h1>
+<h1>
+    <span class="faded">Edit Check</span> <%= check.name %>
+
+    <div class="check-overview">
+        <span id="check_24h"></span>
+    </div>
+</h1>
 <% if (info.length) { %>
 <div class="alert alert-success"><%= info %></div>
 <% } %>
 <%- partial('_check_details', { check: check, pollerCollection: pollerCollection, pollerDetails: pollerDetails, route: route }) %>
-<div>
-</div>
+<div></div>
+
 <script>
 jQuery(function($) {
     // highlight current section in main nav
