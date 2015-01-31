@@ -1,5 +1,5 @@
 var activateMenu = function(/* int */ position) {
-    $('.navbar-nav li').eq(position).addClass('active');
+    $('.navbar-nav > li').eq(position).addClass('active');
 };
 
 var nbNewEvents = 0;

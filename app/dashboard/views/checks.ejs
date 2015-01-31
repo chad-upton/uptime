@@ -4,18 +4,20 @@
 <div class="alert alert-success"><%= info %></div>
 <% } %>
 
-<table class="table" id="checks">
-    <thead>
-        <tr>
-            <th>Name</th>
-            <th style="width:20%">Status</th>
-            <th style="width:35%" title="Outage periods in the last 24h">Uptime</th>
-            <th style="width:15%" title="Average response time in the last 24h">Response Time</th>
-            <th style="width: 100px">Actions</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
+<div class="table-responsive">
+    <table class="table" id="checks">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th style="width:20%">Status</th>
+                <th style="width:35%" title="Outage periods in the last 24h">Uptime</th>
+                <th style="width:15%" title="Average response time in the last 24h">Response Time</th>
+                <th style="width: 100px">Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
 
 <p class="help-block pull-right">* The stats above are from the last 24 hours only.</p>
 
