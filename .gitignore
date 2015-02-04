@@ -6,3 +6,4 @@ app/dashboard/public/vendor
 node_modules
 npm-debug.log
 *.swp
+.idea
