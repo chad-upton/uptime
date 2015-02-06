@@ -39,7 +39,7 @@
 </script>
 <script id="ping_template" type="text/template">
 <tr class="{{= !ping.isUp ? 'red' : !ping.isResponsive ? 'orange' : '' }}">
-  <td title="{{= new Date(ping.timestamp) }}">{{= moment(ping.timestamp).format('LLLL') }}</td>
+  <td title="{{= new Date(ping.timestamp) }}">{{= moment(ping.timestamp).format('LL HH:mm') }}</td>
   <td>
     <span class="label {{= (ping.isUp ? 'label-success' : 'label-danger') }}">{{= (ping.isUp ? 'Up' : 'Down') }}</span>
     {{ if (ping.isUp && !ping.isResponsive) { }}<span class="label label-warning">Slow</span>{{ } }}
@@ -62,8 +62,8 @@ $(document).ready(function() {
   var ping_template = document.getElementById('ping_template').innerHTML;
   var updateStats = function() {
     var dateFormats = {
-      'day': 'LLLL',
-      'month': 'dddd, LL',
+      'day': 'LL HH:mm',
+      'month': 'dddd, HH:mm',
       'year': 'MMMM YYYY'
     }
     var type = dateInterval.type;
