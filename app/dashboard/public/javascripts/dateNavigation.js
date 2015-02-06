@@ -84,9 +84,9 @@ DateNavigation.prototype.titleForPeriod = function(date, type) {
   switch (type) {
     case 'month': return date.format('MMMM');
     case 'day': return date.format('D');
-    case 'hour': return date.format('ha');
+    case 'hour': return date.format('HH');
     case 'tenminutes': 
-      return date.format('h:mma') + " to " + date.clone().add('minutes', 10).subtract('seconds', 1).format('h:mma');
+      return date.format('HH:mm') + " to " + date.clone().add('minutes', 10).subtract('seconds', 1).format('HH:mm');
   }
 }
 DateNavigation.prototype.tooltipForPeriod = function(date, type) {
@@ -94,7 +94,7 @@ DateNavigation.prototype.tooltipForPeriod = function(date, type) {
     case 'month': return date.format('MMMM YYYY');
     case 'day': return date.format('dddd, LL');
     case 'hour': 
-      return "from " + date.format('h:mma') + " to " + date.clone().endOf('hour').format('h:mma');
+      return "from " + date.format('HH:mm') + " to " + date.clone().endOf('hour').format('HH:mm');
     case 'tenminutes': return '';
   }
 }
@@ -154,7 +154,7 @@ DateNavigation.prototype.redrawTitle = function() {
       title += '<div class="btn-group"><button class="btn btn-link" data-type="day" data-date="' + this.interval.date + '">';
       title += momentForDate.format('dddd MMMM Do');
       title += '</button></div>, ';
-      title += momentForDate.clone().startOf('hour').format('ha') + ' to ' + momentForDate.clone().endOf('hour').format('h:mma');
+      title += momentForDate.clone().startOf('hour').format('HH') + ' to ' + momentForDate.clone().endOf('hour').format('HH:mm');
   }
   $('#dateNavigation .title').html(title);
 }
