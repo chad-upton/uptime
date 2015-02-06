@@ -25,7 +25,7 @@
 <script id="check_template" type="text/template">
 <tr>
   <td data-sort="{{= check.name }}">
-	<a href="{{=  route + '/checks/' + check._id }}">{{= check.name }}</a>
+	<a href="{{=  route + '/checks/' + check._id }}?type=hour&date={{= new Date().getTime() }}">{{= check.name }}</a>
 	<a href="{{= check.url }}" target="_blank"><img src="{{= route }}/images/external-link-ltr-icon.png"></a>
   </td>
   {{ if (check.lastTested) { }}
@@ -94,7 +94,7 @@ jQuery(document).ready(function($) {
   }
   updateChecks(<%- JSON.stringify(checks) %>);
   socket.on('CheckEvent', function(data) { updateChecks() });
-  window.setInterval(updateChecks, 5 * 60 * 1000); // refresh every 5 minutes to update the qos scores
+  window.setInterval(updateChecks, 1 * 60 * 1000); // refresh every 1 minute to update the qos scores
 
   // hide alert after 5s
   window.setTimeout(function() {

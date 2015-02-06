@@ -1,8 +1,8 @@
 url: 'http://localhost:8082'
 
 mongodb:
-  server: REPLACE_WITH_MONGO_ENDPOINT
-  database: REPLACE_WITH_MONGO_DATABASE
+  server: REPLACE_WITH_MONGO_ENDPOINT   # localhost
+  database: REPLACE_WITH_MONGO_DATABASE # uptime
   user: REPLACE_WITH_MONGO_USER
   password: REPLACE_WITH_MONGO_PWD
   connectionString:       # alternative to setting server, database, user and password separately
@@ -13,6 +13,12 @@ monitor:
   pollingInterval:        10000      # ten seconds
   timeout:                5000       # five seconds
   userAgent:              NodeUptime/3.0 (https://github.com/springerpe/uptime)
+
+ssl:
+  enabled:                false
+  certificate:            uptime.crt # certificate file
+  key:                    uptime.key # key file
+  selfSigned:             false
 
 analyzer:
   updateInterval:         60000      # one minute
@@ -45,11 +51,6 @@ victorops:
 #  endpoint: https://statushub.io/api/status_pages #the same for all
 #  subdomains: REPLACE_WITH_STATUSHUB_SUBDOMAINS # for example ["my_stuff"] as you can have a number of different status pages
 #  apiKey: REPLACE_WITH_STATUSHUB_APIKEY
-
-statuspage:
-  endpoint: https://api.statuspage.io/v1/pages
-  pageid: REPLACE_WITH_STATUSPAGE_ID
-  apiKey: REPLACE_WITH_STATUSPAGE_APIKEY
 
 email:
   method:      SMTP  # possible methods are SMTP, SES, or Sendmail

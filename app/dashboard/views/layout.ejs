@@ -78,7 +78,7 @@
               changeFavicon(false);
             }
           }
-          if (nbNewEvents > 0) {
+          if (nbNewEvents > 0 && !isActive) {
             document.title = '(' + nbNewEvents +') Uptime';
           };
         });
@@ -87,9 +87,26 @@
         nbNewEvents++;
         updateCounts();
         $('#check_summary').fadeOut().fadeIn().fadeOut().fadeIn();
-        $('#new_events a').html(nbNewEvents + ' new event' + (nbNewEvents > 1 ? 's' : '') + ' since ' + moment(loadedAt).format('LLL'));
+        if(!isActive){
+          $('#new_events a').html(nbNewEvents + ' new event' + (nbNewEvents > 1 ? 's' : '') + ' since ' + moment(loadedAt).format('LLL'));
+        }
       });
       updateCounts();
+
+      var isActive = true;
+
+      window.onfocus = function () {
+        isActive = true;
+      };
+
+      window.onblur = function () {
+        isActive = false;
+      };
+
+      // test
+      setInterval(function () {
+        console.log(window.isActive ? 'active' : 'inactive');
+      }, 500);
     });
     </script>
   </body>

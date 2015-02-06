@@ -24,7 +24,7 @@ jQuery(document).ready(function($) {
       mouse : {
         track: true,
         trackFormatter: function(obj) {
-          return moment(obj.x).format('LLLL') + '<br/><strong>' + obj.y + 'ms</strong>';
+          return moment(obj.x).format('LL HH:mm') + '<br/><strong>' + obj.y + 'ms</strong>';
         },
         relative: true,
         sensibility: 4,

@@ -31,6 +31,7 @@ var Check = new Schema({
   downtime    : { type: Number, default: 0 },
   qos         : {},
   pollerParams : Schema.Types.Mixed,
+  statusHubId : Number
 });
 Check.plugin(require('mongoose-lifecycle'));
 
@@ -95,13 +96,13 @@ Check.methods.setLastTest = function(status, time, error) {
 
   this.lastTested = now;
 
+  var tmplc = this.lastChanged;
   if (this.isUp != status) {
     this.lastChanged = now;
     this.isUp = status;
     this.uptime = 0;
     this.downtime = 0;
   }
-
   if (mustNotifyEvent) {
     var event = new CheckEvent({
       timestamp: now,
@@ -112,7 +113,7 @@ Check.methods.setLastTest = function(status, time, error) {
     });
     if (status && this.lastChanged && this.isUp != undefined) {
       // Check comes back up
-      event.downtime = now.getTime() - this.lastChanged.getTime();
+      event.downtime = now.getTime() - tmplc.getTime();
     }
     event.save();
     this.markEventNotified();
