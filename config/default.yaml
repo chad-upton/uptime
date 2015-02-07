@@ -52,6 +52,9 @@ victorops:
 #  subdomains: REPLACE_WITH_STATUSHUB_SUBDOMAINS # for example ["my_stuff"] as you can have a number of different status pages
 #  apiKey: REPLACE_WITH_STATUSHUB_APIKEY
 
+pushbullet:
+  apikey: ""
+
 email:
   method:      SMTP  # possible methods are SMTP, SES, or Sendmail
   transport:         # see https://github.com/andris9/nodemailer for transport options

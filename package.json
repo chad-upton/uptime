@@ -17,12 +17,13 @@
     "moment": "2.1.0",
     "nodemailer": "0.3.35",
     "net-ping": "1.1.7",
-    "js-yaml": "2.1.0"
+    "js-yaml": "2.1.0",
     "webpagetest": "0.2.0",
     "request": "2.53.0",
     "node-hipchat": "0.4.4",
     "spore": "0.1.6",
     "debug": "^2.1.1",
+    "pushbullet": "1.4.3"
   },
   "devDependencies": {
     "mocha": "1.7.x",
