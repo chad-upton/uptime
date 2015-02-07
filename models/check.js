@@ -95,7 +95,7 @@ Check.methods.setLastTest = function(status, time, error) {
   }
 
   this.lastTested = now;
-
+  this.lastChanged = this.lastChanged || now;
   var tmplc = this.lastChanged;
   if (this.isUp != status) {
     this.lastChanged = now;
