@@ -3,6 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>Uptime</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <link rel="stylesheet" href="<%= route %>/vendor/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="<%= route %>/vendor/fontawesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="<%= route %>/stylesheets/style.css">
@@ -12,6 +13,7 @@
     <link rel="apple-touch-icon" sizes="114x114" href="<%= route %>/apple-touch-icon-iphone4.png">
     <%- renderCssTags(addedCss) %>
     <script src="<%= route %>/vendor/jquery/dist/jquery.min.js"></script>
+    <script src="<%= route %>/javascripts/bootstrap.min.js"></script>
     <script src="<%= route %>/javascripts/jquery-ui.autocomplete.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -26,7 +28,7 @@
     <![endif]-->
   </head>
   <body>
-    <div class="navbar navbar-inverse navbar-fixed-top">
+    <!--div class="navbar navbar-inverse navbar-fixed-top">
       <div class="navbar-inner">
         <div class="container">
           <div class="navbar-header">
@@ -44,7 +46,58 @@
           </ul>
         </div>
       </div>
-    </div>
+    </div-->
+    <nav class="navbar-inverse navbar-default">
+      <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Uptime</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="<%= route %>/events">Events</a></li>
+            <li><a href="<%= route %>/checks">Checks</a></li>
+            <li><a href="<%= route %>/tags">Tags</a></li>
+            <!--li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+                <li class="divider"></li>
+                <li><a href="#">One more separated link</a></li>
+              </ul>
+            </li-->
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+              <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
+              <ul class="dropdown-menu" role="menu">
+                <li><a href="#">Action</a></li>
+                <li><a href="#">Another action</a></li>
+                <li><a href="#">Something else here</a></li>
+                <li class="divider"></li>
+                <li><a href="#">Separated link</a></li>
+              </ul>
+            </li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right" id="check_summary">
+            <li id="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
+            <li id="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
+          </ul>
+        </div><!-- /.navbar-collapse -->
+      </div><!-- /.container-fluid -->
+    </nav>
     <section class="container">
       <%- body %>
     </section>
@@ -108,6 +161,13 @@
       setInterval(function () {
         console.log(window.isActive ? 'active' : 'inactive');
       }, 500);
+    });
+    </script>
+  </body>
+    <script>
+      window.onblur = function () {
+        isActive = false;
+      };
     });
     </script>
   </body>

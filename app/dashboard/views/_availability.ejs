@@ -2,6 +2,7 @@
 <div id="availabilityGraph" class="panel-body graph adjustedOnDateNavigation"></div>
 <script>
 jQuery(document).ready(function($) {
+  var loaded = false;
   var refreshAvailabilityGraph = function() {
     var availabilities = [];
     var minAvailability = Infinity;
@@ -11,6 +12,7 @@ jQuery(document).ready(function($) {
       minAvailability = Math.min(minAvailability, availability);
     });
     var container = $('#availabilityGraph').get(0);
+    $('#availabilityGraph').width($('.panel-heading').width()-40);
     Flotr.draw(container, [{ data: availabilities, lines : { show: true, lineWidth: 4, fill : true, fillColor: ['#00A8F0', '#fff'] }, points: { show: true } }], { 
       yaxis : {
         min : 0,
@@ -41,7 +43,17 @@ jQuery(document).ready(function($) {
       if (!hit.series || dateInterval.isMaxZoom()) return;
       dateInterval.update(dateInterval.subType(), hit.x);
     });
-  }
+    if(!loaded){
+      loaded = true;
+      setTimeout(resizeFn,500);
+    }
+  };
+
   dateInterval.on('refresh-stats', refreshAvailabilityGraph);
+  var resizeFn = function(){
+    refreshAvailabilityGraph();
+  }
+  $(window).resize(resizeFn);
+  resizeFn();
 });
 </script>
