@@ -11,13 +11,13 @@ var Account = new Schema({
   email        : String,
   user         : String,
   pass         : String,
-  country         : String
+  date         : String
 });
 Account.plugin(require('mongoose-lifecycle'));
 
 
 /* login validation methods */
-
+/*
 Account.methods.autoLogin = function(user, pass, callback)
 {
   Account.findOne({user:user}, function(e, o) {
@@ -45,8 +45,7 @@ Account.methods.manualLogin = function(user, pass, callback)
   });
 }
 
-/* record insertion, update & deletion methods */
-
+/* record insertion, update & deletion methods
 Account.methods.addNewAccount = function(newData, callback)
 {
   /*Account.findOne({user:newData.user}, function(e, o) {
@@ -66,7 +65,7 @@ Account.methods.addNewAccount = function(newData, callback)
         }
       });
     }
-  });*/
+  });
   console.log(newData);
   Account.findOne({user: newData.user},function(e,o){
     console.log(e,o)
@@ -111,7 +110,7 @@ Account.methods.updatePassword = function(email, newPass, callback)
   });
 }
 
-/* account lookup methods */
+/* account lookup methods
 
 Account.methods.deleteAccount = function(id, callback)
 {
@@ -143,7 +142,7 @@ Account.methods.delAllRecords = function(callback)
 {
   Account.remove({}, callback); // reset accounts collection for testing //
 }
-
+*/
 /* private encryption & validation methods */
 
 var generateSalt = function()
@@ -161,13 +160,13 @@ var md5 = function(str) {
   return crypto.createHash('md5').update(str).digest('hex');
 }
 
-var saltAndHash = function(pass, callback)
+Account.statics.saltAndHash = function(pass, callback)
 {
   var salt = generateSalt();
   callback(salt + md5(pass + salt));
 }
 
-var validatePassword = function(plainPass, hashedPass, callback)
+Account.statics.validatePassword = function(plainPass, hashedPass, callback)
 {
   var salt = hashedPass.substr(0, 10);
   var validHash = salt + md5(plainPass + salt);

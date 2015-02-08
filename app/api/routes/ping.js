@@ -11,6 +11,22 @@ var Ping       = require('../../../models/ping');
  */
 module.exports = function(app) {
 
+  /*
+  User middleware
+   */
+  var isUser = function(req,res,next){
+    if(req.session.user) {
+      //@TODO Validate logged in user against database
+      req.user = req.session.user;
+      app.locals.user = req.session.user;
+      next();
+    } else {
+      res.status(403)     // HTTP status 404: NotFound
+        .send('Forbidden');
+    }
+    //next();
+  };
+
   // support 'check' and 'page' arguments in query string
   app.get('/pings', function(req, res, next) {
     var query = {};
@@ -28,7 +44,7 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/pings/events', function(req, res, next) {
+  app.get('/pings/events', isUser,  function(req, res, next) {
     CheckEvent
     .find({ timestamp: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } })
     .sort({ timestamp: -1 })

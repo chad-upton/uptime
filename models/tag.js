@@ -25,6 +25,7 @@ var Tag = new Schema({
   responseTime   : Number,
   downtime       : Number,
   outages        : Array,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
 Tag.index({ name: 1 }, { unique: true });
 Tag.plugin(require('mongoose-lifecycle'));

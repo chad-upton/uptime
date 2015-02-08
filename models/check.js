@@ -31,7 +31,8 @@ var Check = new Schema({
   downtime    : { type: Number, default: 0 },
   qos         : {},
   pollerParams : Schema.Types.Mixed,
-  statusHubId : Number
+  statusHubId : Number,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
 Check.plugin(require('mongoose-lifecycle'));
 

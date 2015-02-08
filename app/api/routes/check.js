@@ -13,11 +13,24 @@ var CheckMonthlyStat = require('../../../models/checkMonthlyStat');
  */
 module.exports = function(app) {
 
-  app.get('/checks', function(req, res, next) {
+  var isUser = function(req,res,next){
+    if(req.session.user) {
+      //@TODO Validate logged in user against database
+      req.user = req.session.user;
+      app.locals.user = req.session.user;
+      next();
+    } else {
+      res.status(403)     // HTTP status 404: NotFound
+        .send('Forbidden');
+    }
+    //next();
+  };
+  app.get('/checks',isUser, function(req, res, next) {
     var query = {};
     if (req.query.tag) {
       query.tags = req.query.tag;
     }
+    query.owner = req.user._id
     Check
     .find(query)
     .sort({ isUp: 1, lastChanged: -1 })
@@ -37,6 +50,8 @@ module.exports = function(app) {
     });
   });
 
+
+
   // check route middleware
   var loadCheck = function(req, res, next) {
     Check
@@ -50,11 +65,12 @@ module.exports = function(app) {
     });
   };
 
-  app.get('/checks/:id', loadCheck, function(req, res, next) {
+
+  app.get('/checks/:id',isUser, loadCheck, function(req, res, next) {
     res.json(req.check);
   });
   
-  app.get('/checks/:id/pause', loadCheck, function(req, res, next) {
+  app.get('/checks/:id/pause',isUser, loadCheck, function(req, res, next) {
     req.check.togglePause();
     req.check.save(function(err) {
       if (err) return next(new Error('failed to toggle pause on check' + req.params.id));
@@ -68,14 +84,14 @@ module.exports = function(app) {
     });
   });
 
-  app.put('/check/:id/test', function (req, res, next) {
+  app.put('/check/:id/test',isUser , function (req, res, next) {
     Check.update({ _id: req.params.id }, { lastTested: new Date() }, function(err, numberAffected) {
       if (err) return next(err);
       res.json({ numberAffected: numberAffected });
     });
   });
 
-  app.get('/checks/:id/stat/:period/:timestamp', loadCheck, function(req, res, next) {
+  app.get('/checks/:id/stat/:period/:timestamp', isUser, loadCheck, function(req, res, next) {
     req.check.getSingleStatForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
       if (err) return next(err);
       res.json(stat);
@@ -89,7 +105,7 @@ module.exports = function(app) {
     });
   });
   
-  app.get('/checks/:id/events', function(req, res, next) {
+  app.get('/checks/:id/events',isUser, function(req, res, next) {
     var query = {
       check: req.params.id,
       timestamp: { $gte: req.query.begin || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }

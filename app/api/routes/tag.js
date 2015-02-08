@@ -12,8 +12,19 @@ var async         = require('async');
  * Check Routes
  */
 module.exports = function(app) {
-  
-  app.get('/tags', function(req, res) {
+  var isUser = function(req,res,next){
+    if(req.session.user) {
+      //@TODO Validate logged in user against database
+      req.user = req.session.user;
+      app.locals.user = req.session.user;
+      next();
+    } else {
+      res.status(403)     // HTTP status 404: NotFound
+        .send('Forbidden');
+    }
+    //next();
+  };
+  app.get('/tags', isUser, function(req, res) {
     Tag
     .find()
     .sort({ name: 1 })
@@ -24,7 +35,7 @@ module.exports = function(app) {
   });
 
   // tag search for autocomplete
-  app.get('/tags/search', function(req, res) {
+  app.get('/tags/search',isUser, function(req, res) {
     Tag
       .aggregate({ $match :   { name : { $regex: req.query.term, $options: 'i' } } },
       { $project : {_id : 0,
@@ -47,32 +58,32 @@ module.exports = function(app) {
     });
   };
   
-  app.get('/tags/:name', loadTag, function(req, res, next) {
+  app.get('/tags/:name',isUser , loadTag, function(req, res, next) {
     res.json(req.tag);
   });
 
-  app.get('/tags/:name/checks/:period/:timestamp', loadTag, function(req, res, next) {
+  app.get('/tags/:name/checks/:period/:timestamp', isUser,  loadTag, function(req, res, next) {
     req.tag.getChecksForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, checks) {
       if (err) return next(err);
       res.json(checks);
     })
   });
 
-  app.get('/tags/:name/stat/:period/:timestamp', loadTag, function(req, res, next) {
+  app.get('/tags/:name/stat/:period/:timestamp', isUser, loadTag, function(req, res, next) {
     req.tag.getSingleStatsForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
       if(err) return next(err);
       res.json(stat);
     });
   });
 
-  app.get('/tags/:name/stats/:type', loadTag, function(req, res, next) {
+  app.get('/tags/:name/stats/:type', isUser, loadTag, function(req, res, next) {
     req.tag.getStatsForPeriod(req.params.type, req.query.begin, req.query.end, function(err, stats) {
       if(err) return next(err);
       res.json(stats);
     });
   });
 
-  app.get('/tags/:name/events', function(req, res) {
+  app.get('/tags/:name/events',isUser,  function(req, res) {
     var query = {
       tags: req.params.name,
       timestamp: { $gte: req.query.begin || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }

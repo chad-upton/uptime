@@ -15,7 +15,6 @@ var CheckMonthlyStat = require('../../models/checkMonthlyStat');
 var moduleInfo = require('../../package.json');
 
 var Account = require('../../models/user/accountManager');
-Account = new Account();
 var app = module.exports = express();
 
 // middleware
@@ -65,82 +64,50 @@ app.locals({
 /*
  User routes
  */
+require('./appUser')(app);
 
+//userMiddleware
+var isAuthed = function(req,res,next){
+  if(req.session.user) {
+    //@TODO Validate logged in user against database
+    req.user = req.session.user;
+    app.locals.user = req.session.user;
+    next();
+  } else {
+    app.locals.user = false;
+    res.redirect('/dashboard/login');
+  }
+};
 
-app.get('/login', function(req, res) {
-  res.render('user/login');
-});
-
-
-app.post('/login', function(req, res){
-  AM.manualLogin(req.param('user'), req.param('pass'), function(e, o){
-    if (!o){
-      res.send(e, 400);
-    }	else{
-      req.session.user = o;
-      if (req.param('remember-me') == 'true'){
-        res.cookie('user', o.user, { maxAge: 900000 });
-        res.cookie('pass', o.pass, { maxAge: 900000 });
-      }
-      res.send(o, 200);
-    }
-  });
-});
-
-app.get('/signup', function(req, res) {
-  res.render('user/signup');
-});
-
-app.post('/signup', function(req, res){
-  var newUser = {};
-  newUser.name = req.param('name');
-  newUser.email = req.param('email');
-  newUser.pass = req.param('pass');
-  Account.addNewAccount(newUser,function(result){
-    console.log(result);
-  });
-  /*AM.addNewAccount({
-    name 	: req.param('name'),
-    email 	: req.param('email'),
-    user 	: req.param('user'),
-    pass	: req.param('pass'),
-    country : req.param('country')
-  }, function(e){
-    if (e){
-      res.send(e, 400);
-    }	else{
-      res.send('ok', 200);
-    }
-  });*/
-});
 /* End user routes */
 
 // Routes
 
-app.get('/events', function(req, res) {
+app.get('/events', isAuthed, function(req, res) {
   res.render('events');
 });
 
-app.get('/checks', function(req, res, next) {
-  Check.find().sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
+app.get('/checks',isAuthed, function(req, res, next) {
+  Check.find({ owner: req.user._id }).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
     if (err) return next(err);
     res.render('checks', { info: req.flash('info'), checks: checks });
   });
 });
 
-app.get('/checks/new', function(req, res) {
+app.get('/checks/new',isAuthed, function(req, res) {
   res.render('check_new', { check: new Check(), pollerCollection: app.get('pollerCollection'), info: req.flash('info') });
 });
 
-app.post('/checks', function(req, res, next) {
+app.post('/checks',isAuthed, function(req, res, next) {
   var check = new Check();
   try {
     var dirtyCheck = req.body.check;
-    check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'))
+    check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'));
     app.emit('populateFromDirtyCheck', check, dirtyCheck, check.type);
   } catch (err) {
     return next(err);
   }
+  check.owner = req.user._id;
   check.save(function(err) {
     if (err) return next(err);
     req.flash('info', 'New check has been created');
@@ -148,16 +115,16 @@ app.post('/checks', function(req, res, next) {
   });
 });
 
-app.get('/checks/:id', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+app.get('/checks/:id',isAuthed, function(req, res, next) {
+  Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
     res.render('check', { check: check, info: req.flash('info'), req: req });
   });
 });
 
-app.get('/checks/:id/edit', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+app.get('/checks/:id/edit',isAuthed, function(req, res, next) {
+  Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
     var pollerDetails = [];
@@ -166,7 +133,7 @@ app.get('/checks/:id/edit', function(req, res, next) {
   });
 });
 
-app.get('/pollerPartial/:type', function(req, res, next) {
+app.get('/pollerPartial/:type',isAuthed, function(req, res, next) {
   var poller;
   try {
     poller = app.get('pollerCollection').getForType(req.params.type);
@@ -178,8 +145,8 @@ app.get('/pollerPartial/:type', function(req, res, next) {
   res.send(pollerDetails.join(''));
 });
 
-app.put('/checks/:id', function(req, res, next) {
-  Check.findById(req.params.id, function(err, check) {
+app.put('/checks/:id',isAuthed, function(req, res, next) {
+  Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     try {
       var dirtyCheck = req.body.check;
@@ -188,6 +155,12 @@ app.put('/checks/:id', function(req, res, next) {
     } catch (populationError) {
       return next(populationError);
     }
+    if(check.owner != req.user._id){
+      console.log('Illegal save detected');
+      req.flash('info', 'Changes not saved');
+      res.redirect(app.route + '/checks/' + req.params.id);
+    }
+
     check.save(function(err2) {
       if (err2) return next(err2);
       req.flash('info', 'Changes have been saved');
@@ -196,8 +169,8 @@ app.put('/checks/:id', function(req, res, next) {
   });
 });
 
-app.delete('/checks/:id', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+app.delete('/checks/:id',isAuthed, function(req, res, next) {
+  Check.findOne({ _id: req.params.id, owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return next(new Error('failed to load check ' + req.params.id));
     check.remove(function(err2) {
@@ -208,14 +181,14 @@ app.delete('/checks/:id', function(req, res, next) {
   });
 });
 
-app.get('/tags', function(req, res, next) {
+app.get('/tags',isAuthed, function(req, res, next) {
   Tag.find().sort({ name: 1 }).exec(function(err, tags) {
     if (err) return next(err);
     res.render('tags', { info: req.flash('info'), tags: tags });
   });
 });
 
-app.get('/tags/:name', function(req, res, next) {
+app.get('/tags/:name',isAuthed, function(req, res, next) {
   Tag.findOne({ name: req.params.name }, function(err, tag) {
     if (err) {
       return next(err);
