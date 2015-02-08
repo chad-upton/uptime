@@ -12,6 +12,7 @@ var TagMonthlyStat = new Schema({
   responseTime   : Number,
   downtime       : Number,
   outages        : Array,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
 TagMonthlyStat.index({ name: 1, timestamp: -1 }, { unique: true });
 TagMonthlyStat.plugin(require('mongoose-lifecycle'));

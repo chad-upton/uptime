@@ -40,7 +40,7 @@ module.exports = function(app) {
               res.cookie('user', o.user, { maxAge: 900000 });
               res.cookie('pass', o.pass, { maxAge: 900000 });
             }
-            res.redirect('/dashboard/checks');
+            res.redirect('/dashboard/events');
           }	else{
 
             res.render('user/login',{ errors: ['Invalid password'] } );
@@ -87,10 +87,9 @@ module.exports = function(app) {
               newUser.pass = hash;
               // append date stamp when record was created //
               newUser.date = moment().format('MMMM Do YYYY, h:mm:ss a');
-              console.log(newUser)
               newUser.save(function () {
                 req.session.user = newUser;
-                res.redirect('/dashboard/checks');
+                res.redirect('/dashboard/events');
               });
             });
           }

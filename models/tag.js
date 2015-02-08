@@ -103,6 +103,8 @@ Tag.methods.getSingleStatsForPeriod = function(period, date, callback) {
   var query = { name: this.name, timestamp: { $gte: begin, $lte: end } };
   this.db.model(model).findOne(query, function(err, stat) {
     if (err || !stat) return callback(err);
+    console.log('======================');
+    console.log(stat);
     return callback(null, {
       timestamp: Date.parse(stat.timestamp),
       availability: (stat.availability * 100).toFixed(3),

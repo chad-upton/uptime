@@ -12,6 +12,7 @@ var TagYearlyStat = new Schema({
   responseTime   : Number,
   downtime       : Number,
   outages        : Array,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
 TagYearlyStat.index({ name: 1, timestamp: -1 }, { unique: true });
 TagYearlyStat.plugin(require('mongoose-lifecycle'));

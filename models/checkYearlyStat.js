@@ -11,7 +11,8 @@ var CheckYearlyStat = new Schema({
   responsiveness : Number,
   responseTime   : Number,
   downtime       : Number,
-  outages        : Array
+  outages        : Array,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
 CheckYearlyStat.index({ check: 1, timestamp: -1 }, { unique: true });
 CheckYearlyStat.plugin(require('mongoose-lifecycle'));

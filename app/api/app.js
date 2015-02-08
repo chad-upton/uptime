@@ -28,25 +28,7 @@ app.configure('production', function(){
 // up count
 var upCount;
 var refreshUpCount = function(user, callback) {
-  var count = { up: 0, down: 0, paused: 0, total: 0 };
-  Check
-  .find({ owner: user._id })
-  .select({ isUp: 1, isPaused: 1 })
-  .exec(function(err, checks) {
-    if (err) return callback(err);
-    checks.forEach(function(check) {
-      count.total++;
-      if (check.isPaused) {
-        count.paused++;
-      } else if (check.isUp) {
-        count.up++;
-      } else {
-        count.down++;
-      }
-    });
-    upCount = count;
-    callback();
-  });
+
 };
 
 Check.on('afterInsert', function() { upCount = undefined; });
@@ -63,17 +45,30 @@ var isUser = function(req,res,next){
     res.status(403)     // HTTP status 404: NotFound
       .send('Forbidden');
   }
+  //next();
 };
 
 app.get('/checks/count', isUser, function(req, res, next) {
-  if (upCount) {
-    res.json(upCount);
-  } else {
-    refreshUpCount(req.user, function(err) {
-      if (err) return next(err);
-      res.json(upCount);
+  var count = { up: 0, down: 0, paused: 0, total: 0 };
+
+  Check
+    .find({ owner: req.user._id })
+    .select({ isUp: 1, isPaused: 1})
+    .exec(function(err, checks) {
+      if (err) return callback(err);
+      checks.forEach(function(check) {
+        //if(check.owner.toString() !=user._id.toString) return;
+        count.total++;
+        if (check.isPaused) {
+          count.paused++;
+        } else if (check.isUp) {
+          count.up++;
+        } else {
+          count.down++;
+        }
+      });
+      res.json(count);
     });
-  }
 });
 
 

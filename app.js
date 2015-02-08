@@ -107,8 +107,10 @@ app.emit('beforeDashboardRoutes', app, dashboardApp);
 app.use('/dashboard', dashboardApp);
 app.get('/', function(req, res) {
   //res.redirect('/dashboard/events');
-  if (req.cookies.user == undefined || req.cookies.pass == undefined) {
+  if (req.session.user == undefined) {
     res.redirect('/dashboard/login');
+  } else {
+    res.redirect('/dashboard/events');
   }
 });
 

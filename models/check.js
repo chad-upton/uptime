@@ -104,13 +104,15 @@ Check.methods.setLastTest = function(status, time, error) {
     this.uptime = 0;
     this.downtime = 0;
   }
+
   if (mustNotifyEvent) {
     var event = new CheckEvent({
       timestamp: now,
       check: this,
       tags: this.tags,
       message: status ? 'up' : 'down',
-      details: error
+      details: error,
+      owner: this.owner
     });
     if (status && this.lastChanged && this.isUp != undefined) {
       // Check comes back up

@@ -75,7 +75,7 @@ var isAuthed = function(req,res,next){
     next();
   } else {
     app.locals.user = false;
-    res.redirect('/dashboard/login');
+    res.redirect('/dashboard/signout');
   }
 };
 
@@ -182,7 +182,7 @@ app.delete('/checks/:id',isAuthed, function(req, res, next) {
 });
 
 app.get('/tags',isAuthed, function(req, res, next) {
-  Tag.find().sort({ name: 1 }).exec(function(err, tags) {
+  Tag.find({owner: req.user._id}).sort({ name: 1 }).exec(function(err, tags) {
     if (err) return next(err);
     res.render('tags', { info: req.flash('info'), tags: tags });
   });
