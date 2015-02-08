@@ -14,6 +14,8 @@ var TagMonthlyStat = require('../../models/tagMonthlyStat');
 var CheckMonthlyStat = require('../../models/checkMonthlyStat');
 var moduleInfo = require('../../package.json');
 
+var Account = require('../../models/user/accountManager');
+Account = new Account();
 var app = module.exports = express();
 
 // middleware
@@ -36,6 +38,13 @@ app.configure(function(){
     res.locals.moment = moment;
     next();
   });
+  app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
+  app.use(express.cookieSession({
+    key:    'uptime',
+    secret: 'FZ5HEE5YHD3E566756234C45BY4DSFZ4',
+    proxy:  true,
+    cookie: { maxAge: 60 * 60 * 1000 }
+  }));
   app.use(app.router);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
@@ -53,6 +62,58 @@ app.configure('production', function(){
 app.locals({
   version: moduleInfo.version
 });
+/*
+ User routes
+ */
+
+
+app.get('/login', function(req, res) {
+  res.render('user/login');
+});
+
+
+app.post('/login', function(req, res){
+  AM.manualLogin(req.param('user'), req.param('pass'), function(e, o){
+    if (!o){
+      res.send(e, 400);
+    }	else{
+      req.session.user = o;
+      if (req.param('remember-me') == 'true'){
+        res.cookie('user', o.user, { maxAge: 900000 });
+        res.cookie('pass', o.pass, { maxAge: 900000 });
+      }
+      res.send(o, 200);
+    }
+  });
+});
+
+app.get('/signup', function(req, res) {
+  res.render('user/signup');
+});
+
+app.post('/signup', function(req, res){
+  var newUser = {};
+  newUser.name = req.param('name');
+  newUser.email = req.param('email');
+  newUser.pass = req.param('pass');
+  Account.addNewAccount(newUser,function(result){
+    console.log(result);
+  });
+  /*AM.addNewAccount({
+    name 	: req.param('name'),
+    email 	: req.param('email'),
+    user 	: req.param('user'),
+    pass	: req.param('pass'),
+    country : req.param('country')
+  }, function(e){
+    if (e){
+      res.send(e, 400);
+    }	else{
+      res.send('ok', 200);
+    }
+  });*/
+});
+/* End user routes */
 
 // Routes
 

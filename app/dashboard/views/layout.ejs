@@ -15,9 +15,9 @@
     <script src="<%= route %>/vendor/jquery/dist/jquery.min.js"></script>
     <script src="<%= route %>/javascripts/bootstrap.min.js"></script>
     <script src="<%= route %>/javascripts/jquery-ui.autocomplete.min.js"></script>
-    <script src="/socket.io/socket.io.js"></script>
+    <!--script src="/socket.io/socket.io.js"></script-->
     <script>
-    var socket = io.connect(location.protocol + '//' + location.hostname);
+    //var socket = io.connect(location.protocol + '//' + location.hostname);
     </script>
     <script src="<%= route %>/vendor/moment/min/moment.min.js"></script>
     <!--[if lt IE 9]>
@@ -137,14 +137,14 @@
           };
         });
       };
-      socket.on('CheckEvent', function() {
+      /*socket.on('CheckEvent', function() {
         nbNewEvents++;
         updateCounts();
         $('#check_summary').fadeOut().fadeIn().fadeOut().fadeIn();
         if(!isActive){
           $('#new_events a').html(nbNewEvents + ' new event' + (nbNewEvents > 1 ? 's' : '') + ' since ' + moment(loadedAt).format('LLL'));
         }
-      });
+      });*/
       updateCounts();
 
       var isActive = true;

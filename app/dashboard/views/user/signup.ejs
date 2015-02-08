@@ -1,0 +1,44 @@
+<input type="hidden" id="userId">
+<div id="account-form-container">
+  <form method="post" id="account-form" class="form-horizontal well span6">
+    <h1></h1>
+    <p id="sub1" class="subheading">Please tell us a little about yourself.</p>
+    <hr>
+    <fieldset>
+      <div id="name-cg" class="control-group">
+        <label for="name-tf" class="control-label">Name</label>
+        <div class="controls">
+          <input id="name-tf" type="text" name="name" class="input-xlarge">
+        </div>
+      </div>
+      <div id="email-cg" class="control-group">
+        <label for="email-tf" class="control-label">Email</label>
+        <div class="controls">
+          <input id="email-tf" type="text" name="email" class="input-xlarge">
+        </div>
+      </div>
+      <p id="sub2" class="subheading"></p>
+      <div id="user-cg" class="control-group">
+        <label for="user-tf" class="control-label">Username</label>
+        <div class="controls">
+          <input id="user-tf" type="text" name="user" class="input-xlarge disabled">
+        </div>
+      </div>
+      <div id="pass-cg" class="control-group">
+        <label for="pass-tf" class="control-label">Password</label>
+        <div class="controls">
+          <input id="pass-tf" type="password" name="pass" value="" class="input-xlarge">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" id="account-form-btn1" class="btn">Cancel</button>
+        <button type="submit" id="account-form-btn2" class="btn">Signup</button>
+      </div>
+    </fieldset>
+  </form>
+</div>
+<script>
+  $(document).ready(function(){
+    $('#account-form-btn1').click(function(){ window.location.href = '/';});
+  });
+</script>

@@ -1,0 +1,17 @@
+<div id="login-container">
+  <form method="post" id="login-form" class="well span4">
+    <h1>Hello!</h1>
+    <p class="subheading">Please Login To Your Account</p>
+    <label>Username </label>
+    <input type="text" name="user" id="user-tf" class="span4 required">
+    <label>Password</label>
+    <input type="password" name="pass" id="pass-tf" class="span4 required">
+    <button type="submit" id="btn-login" class="btn btn-primary"><i class="icon-lock icon-white"></i>Sign in</button>
+    <label id="remember-me" class="checkbox">Remember Me
+      <input type="checkbox" checked="checked">
+    </label>
+    <div class="clear-fix"></div>
+    <hr>
+    <div class="btm-links"><a href="#" id="forgot-password">Forgot Your Password?</a><a href="<%= route %>/signup" id="create-account">Create An Account</a></div>
+  </form>
+</div>

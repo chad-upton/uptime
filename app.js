@@ -6,6 +6,7 @@ var http       = require('http');
 var https      = require('https');
 var url        = require('url');
 var express    = require('express');
+var cookieParser = require('cookie-parser');
 var config     = require('config');
 var socketIo   = require('socket.io');
 var fs         = require('fs');
@@ -44,11 +45,7 @@ if (config.ssl && config.ssl.enabled === true) {
 }
 
 app.configure(function(){
-  app.use(app.router);
-  // the following middlewares are only necessary for the mounted 'dashboard' app,
-  // but express needs it on the parent app (?) and it therefore pollutes the api
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
+
   app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
   app.use(express.cookieSession({
     key:    'uptime',
@@ -56,6 +53,11 @@ app.configure(function(){
     proxy:  true,
     cookie: { maxAge: 60 * 60 * 1000 }
   }));
+  app.use(app.router);
+  // the following middlewares are only necessary for the mounted 'dashboard' app,
+  // but express needs it on the parent app (?) and it therefore pollutes the api
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
   app.set('pollerCollection', new PollerCollection());
 });
 
@@ -104,7 +106,10 @@ app.use('/api', apiApp);
 app.emit('beforeDashboardRoutes', app, dashboardApp);
 app.use('/dashboard', dashboardApp);
 app.get('/', function(req, res) {
-  res.redirect('/dashboard/events');
+  //res.redirect('/dashboard/events');
+  if (req.cookies.user == undefined || req.cookies.pass == undefined) {
+    res.redirect('/dashboard/login');
+  }
 });
 
 app.get('/favicon.ico', function(req, res) {
