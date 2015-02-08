@@ -274,14 +274,15 @@ i.icon-chevron-right {
   width: 31px;
 }
 .btn.btn-sm.tenminutes {
-  width: 120px;
+  /*width: 120px;*/
+  width: 14.10999%;
 }
 ul.nav-tabs li span {
   font-weight: bold;
 }
 .graph {
   margin: 20px 0 0 25px;
-  width:600px;
+  width: 100%;
   height:200px;
 }
 #checkUptimeBars li {
@@ -293,4 +294,9 @@ ul.nav-tabs li span {
 }
 #check_24h + a.btn {
   margin-left: 10px;
+}
+@media screen and (max-width: 992px){
+  .periods .btn-group{
+   /* display: none;*/
+  }
 }
