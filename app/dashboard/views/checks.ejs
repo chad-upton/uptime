@@ -4,7 +4,7 @@
 <h1 class="page-header">
 	<i class="fa fa-tasks"></i> Checks 
 	<div class="pull-right">
-		<small>last 24 hours</small>&nbsp;&nbsp;
+		<small class="hidden-xs">last 24 hours&nbsp;&nbsp;</small>
 		<a class="btn btn-primary" href="<%= route %>/checks/new">Create check</a>
 	</div>
 </h1>
@@ -16,7 +16,7 @@
 	<tr>
 	  <th style="width:30%">Name</th>
 	  <th style="width:20%">Status</th>
-	  <th style="width:35%" title="Outage periods in the last 24h">Uptime</th>
+	  <th class="hidden-xs" style="width:35%" title="Outage periods in the last 24h">Uptime</th>
 	  <th style="width:15%" title="Average response time in the last 24h">Response Time</th>
 	</tr>
   </thead>
@@ -40,7 +40,7 @@
   <td data-sort="0"><span class="label label-danger">down</span> <span class="label label-warning">new</span></td>
   {{ } }}
   {{ if (check.qos) { }}
-  <td data-sort="{{= check.qos.availability }}">
+  <td data-sort="{{= check.qos.availability }}" class="hidden-xs">
 	  {{- uptimeBar('check', {
 		from: Date.now() - 24 * 60 * 60 * 1000,
 		to: Date.now(),
