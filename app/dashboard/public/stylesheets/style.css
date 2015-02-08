@@ -1,7 +1,9 @@
 * {
     font-family: 'Microsoft Yahei';
 }
-
+body{
+  overflow-x:hidden;
+}
 
 h1, h2, h3 {
   font-weight: normal;
@@ -299,5 +301,9 @@ ul.nav-tabs li span {
 @media screen and (max-width: 992px){
   .periods .btn-group{
    /* display: none;*/
+  }
+  #secondaryNav{
+    position: inherit !important;
+    height: 270px;
   }
 }

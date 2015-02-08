@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>Uptime</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
     <link rel="stylesheet" href="<%= route %>/vendor/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="<%= route %>/vendor/fontawesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="<%= route %>/stylesheets/style.css">
@@ -13,7 +13,7 @@
     <link rel="apple-touch-icon" sizes="114x114" href="<%= route %>/apple-touch-icon-iphone4.png">
     <%- renderCssTags(addedCss) %>
     <script src="<%= route %>/vendor/jquery/dist/jquery.min.js"></script>
-    <script src="javascripts/bootstrap.min.js"></script>
+    <script src="<%= route %>/javascripts/bootstrap.min.js"></script>
     <script src="<%= route %>/javascripts/jquery-ui.autocomplete.min.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -165,10 +165,11 @@
     });
     </script>
   </body>
-			window.onblur = function () {
-				isActive = false;
-			};
-		});
-		</script>
-	</body>
+    <script>
+      window.onblur = function () {
+        isActive = false;
+      };
+    });
+    </script>
+  </body>
 </html>
