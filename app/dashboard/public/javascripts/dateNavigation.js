@@ -129,7 +129,35 @@ DateNavigation.prototype.redrawPeriods = function() {
   }
   periods += '</div>';
   $('#dateNavigation .periods').html(periods);
-}
+  var _self = this;
+  autoWidthPerioid = function(){
+    console.log(_self.interval.type);
+    var containerWidth = $(window).width()*0.8333333333;
+
+
+    var stripWidth;
+    switch(_self.interval.type){
+      case "hour":
+        stripWidth = 180;
+        $('.periods .btn-group').width($('.col-sm-10').width()+60);
+        break;
+      case "day":
+        stripWidth = 130;
+        break;
+      case "month":
+        stripWidth = 142;
+        break;
+      case "year":
+        stripWidth = 95;
+        break;
+    }
+
+    var ourWidth = ($('.col-sm-10').width()-stripWidth)/$('.periods .btn-group > button').not(':first').not(':last').length;
+    $('.periods .btn-group > button').not(':first').not(':last').width(ourWidth+'px');
+  };
+  autoWidthPerioid();
+  $(window).resize(autoWidthPerioid)
+};
 DateNavigation.prototype.redrawTitle = function() {
   var title = '';
   var momentForDate = this.interval.momentForDate;
@@ -176,6 +204,6 @@ DateNavigation.prototype.redrawZoom = function() {
 }
 DateNavigation.prototype.adjustWidth = function() {
   var navigationWidth = $('#dateNavigation .periods .btn-group').width() - 58;
-  $('#dateNavigation .timeline').width(navigationWidth);
+  //$('#dateNavigation .timeline').width(navigationWidth);
   $('.adjustedOnDateNavigation').width(navigationWidth);
 }

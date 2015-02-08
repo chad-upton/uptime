@@ -51,12 +51,6 @@ jQuery(document).ready(function($) {
 
   dateInterval.on('refresh-stats', refreshAvailabilityGraph);
   var resizeFn = function(){
-    var containerWidth = $(window).width()*0.8333333333;
-    var periodsWidth = ($(window).width() >= 762) ? containerWidth : '100%';
-    $('.periods .btn-group').width($('.col-sm-10').width()+60);
-    var ourWidth = ($('.col-sm-10').width()-180)/$('.periods .btn-group > button').not(':first').not(':last').length;
-    $('.periods .btn-group > button').not(':first').not(':last').width(ourWidth+'px');
-    $('.timeline').width($('.col-sm-10').width()-60);
     refreshAvailabilityGraph();
   }
   $(window).resize(resizeFn);

@@ -106,7 +106,15 @@ jQuery(document).ready(function($) {
       });
     });
   }, 5000);
-  
+  window.autoWidthDateNavigation = function(){
+   /* var containerWidth = $(window).width()*0.8333333333;
+    var periodsWidth = ($(window).width() >= 762) ? containerWidth : '100%';
+    $('.periods .btn-group').width($('.col-sm-10').width()+60);
+    var ourWidth = ($('.col-sm-10').width()-180)/$('.periods .btn-group > button').not(':first').not(':last').length;
+    $('.periods .btn-group > button').not(':first').not(':last').width(ourWidth+'px');*/
+  };
+  $(window).resize(autoWidthDateNavigation)
+
   // update stats for each ping if looking at the current hour
   socket.emit('set check', '<%= check._id %>');
   socket.on('ping', function(ping) {
@@ -114,6 +122,7 @@ jQuery(document).ready(function($) {
     if (dateInterval.type == 'hour' && now > dateInterval.begin.valueOf() && now < dateInterval.end.valueOf()) {
       dateInterval.refreshData();
     }
+    autoWidthDateNavigation();
   });
   
   // update stats every 15 minutes if looking at the current moment

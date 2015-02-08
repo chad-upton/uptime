@@ -11,6 +11,7 @@ jQuery(document).ready(function($) {
       minResponsiveness = Math.min(minResponsiveness, responsiveness);
     });
     var container = $('#responsivenessGraph').get(0);
+    $('#responsivenessGraph').width($('.panel-heading').width()-40);
     Flotr.draw(container, [{ data: responsivenessData, color: '#9440ED', lines: { show: true, lineWidth: 4 }, points: { show: true } }], { 
       yaxis : {
         min : 0,
@@ -43,5 +44,6 @@ jQuery(document).ready(function($) {
     });
   }
   dateInterval.on('refresh-stats', refreshResponsivenessGraph);
+  $(window).resize(refreshResponsivenessGraph);
 });
 </script>
