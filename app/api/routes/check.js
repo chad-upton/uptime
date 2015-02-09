@@ -31,8 +31,8 @@ module.exports = function(app) {
     //next();
   };
 
-  app.get('/checks', function(req, res, next) {
-    var query = {owner: req.user.id};
+  app.get('/checks',isUser, function(req, res, next) {
+    var query = {owner: req.user._id};
     if (req.query.tag) {
       query.tags = req.query.tag;
     }

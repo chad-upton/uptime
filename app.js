@@ -13,6 +13,7 @@ var fs         = require('fs');
 var monitor    = require('./lib/monitor');
 var analyzer   = require('./lib/analyzer');
 var CheckEvent = require('./models/checkEvent');
+var Account = require('./models/user/accountManager');
 var Ping       = require('./models/ping');
 var PollerCollection = require('./lib/pollers/pollerCollection');
 var apiApp     = require('./app/api/app');
@@ -106,12 +107,23 @@ app.use('/api', apiApp);
 app.emit('beforeDashboardRoutes', app, dashboardApp);
 app.use('/dashboard', dashboardApp);
 app.get('/', function(req, res) {
-  //res.redirect('/dashboard/events');
-  if (req.session.user == undefined) {
-    res.redirect('/dashboard/login');
+  if(req.cookies.user && req.cookies.pass){
+    Account.findOne({user: req.cookies.user, pass: req.cookies.pass},function(e,r){
+      if(r){
+        req.session.user = r;
+        res.redirect('/dashboard/events');
+      } else {
+        res.redirect('/dashboard/logout');
+      }
+    });
   } else {
-    res.redirect('/dashboard/events');
+    if (req.session.user == undefined) {
+      res.redirect('/dashboard/login');
+    } else {
+      res.redirect('/dashboard/events');
+    }
   }
+
 });
 
 app.get('/favicon.ico', function(req, res) {

@@ -23,6 +23,8 @@ module.exports = function(app) {
   app.get('/signout', function (req, res) {
     delete req.session.user;
     app.locals.user = false;
+    res.clearCookie('user');
+    res.clearCookie('pass');
     res.redirect('/dashboard/login');
   });
 
@@ -49,9 +51,9 @@ module.exports = function(app) {
         Account.validatePassword(pass, o.pass, function(err, r) {
           if (r){
             req.session.user = o;
-            if (req.param('remember-me') == 'true'){
-              res.cookie('user', o.user, { maxAge: 900000 });
-              res.cookie('pass', o.pass, { maxAge: 900000 });
+            if (req.param('remember-me') == 'on'){
+              res.cookie('user', o.user, { maxAge:  365 * 24 * 60 * 60 * 1000 });
+              res.cookie('pass', o.pass, { maxAge:  365 * 24 * 60 * 60 * 1000 });
             }
             res.redirect('/dashboard/events');
           }	else{
@@ -74,7 +76,14 @@ module.exports = function(app) {
     newUser.email = req.param('email');
     newUser.pass = req.param('pass');
     newUser.user = req.param('user');
-
+    newUser.notificationSettings = {
+      email: "",
+      pushbullet: "",
+      statushub:{
+        subdomains: "",
+        apikey: ""
+      }
+    };
     if(newUser.name===''){
       errors.push('Fill in a username');
     }
@@ -113,7 +122,11 @@ module.exports = function(app) {
 
   app.get('/settings', isAuthed, function (req, res) {
     Account.findOne({user: req.user.user}, function(e, o){
-      res.render('user/settings',{errors: [],user: o });
+      if(o) {
+        res.render('user/settings', {errors: [], user: o});
+      } else {
+        res.redirect('/dashboard/login');
+      }
     })
   });
 

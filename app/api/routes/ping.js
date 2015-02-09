@@ -49,7 +49,6 @@ module.exports = function(app) {
   });
 
   app.get('/pings/events', isUser,  function(req, res, next) {
-    console.log(req.user)
     CheckEvent
     .find({ timestamp: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, owner: req.user._id })
     .sort({ timestamp: -1 })

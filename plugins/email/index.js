@@ -53,6 +53,7 @@ var fs         = require('fs');
 var nodemailer = require('nodemailer');
 var moment     = require('moment');
 var CheckEvent = require('../../models/checkEvent');
+var Account = require('../../models/user/accountManager');
 var ejs        = require('ejs');
 
 exports.initWebApp = function(options) {

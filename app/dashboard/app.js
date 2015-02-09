@@ -38,12 +38,12 @@ app.configure(function(){
     next();
   });
   app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
-  app.use(express.cookieSession({
+  /*app.use(express.cookieSession({
     key:    'uptime',
     secret: 'FZ5HEE5YHD3E566756234C45BY4DSFZ4',
     proxy:  true,
     cookie: { maxAge: 60 * 60 * 1000 }
-  }));
+  }));*/
   app.use(app.router);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
