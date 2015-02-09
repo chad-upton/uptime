@@ -60,6 +60,12 @@
             <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" href="#">Uptime</a>
+          <% if(typeof user ==="object"){ %>
+            <ul class="nav navbar-nav pull-right visible-xs check_summary">
+              <li class="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
+              <li class="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
+            </ul>
+          <% } %>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -86,7 +92,7 @@
                 <li class="dropdown">
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%= user.user%> <span class="caret"></span></a>
                 <ul class="dropdown-menu" role="menu">
-                  <li><a href="#">Action</a></li>
+                  <li><a href="<%= route %>/settings">Account settings</a></li>
                   <li><a href="#">Another action</a></li>
                   <li><a href="#">Something else here</a></li>
                   <li class="divider"></li>
@@ -95,9 +101,9 @@
               </li>
             </ul>
 
-            <ul class="nav navbar-nav navbar-right" id="check_summary">
-              <li id="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
-              <li id="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
+            <ul class="nav navbar-nav navbar-right check_summary hidden-xs">
+              <li class="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
+              <li class="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
             </ul>
           </div><!-- /.navbar-collapse -->
         <% } %>
@@ -125,15 +131,15 @@
         var updateCounts = function() {
           $.getJSON('/api/checks/count', function(count) {
             if (count.total > 0) {
-              $('#all_up').show().children('strong').text(count.up);
+              $('.all_up').show().children('strong').text(count.up);
             } else {
-              $('#all_up').hide();
+              $('.all_up').hide();
             }
             if (count.down > 0) {
-              $('#all_down').show().children('strong').text(count.down);
+              $('.all_down').show().children('strong').text(count.down);
               changeFavicon(true);
             } else {
-              $('#all_down').hide();
+              $('.all_down').hide();
               if (nbNewEvents > 0) {
                 changeFavicon(false);
               }
@@ -146,7 +152,7 @@
         socket.on('CheckEvent', function() {
           nbNewEvents++;
           updateCounts();
-          $('#check_summary').fadeOut().fadeIn().fadeOut().fadeIn();
+          $('.check_summary').fadeOut().fadeIn().fadeOut().fadeIn();
           if(!isActive){
             $('#new_events a').html(nbNewEvents + ' new event' + (nbNewEvents > 1 ? 's' : '') + ' since ' + moment(loadedAt).format('LLL'));
           }

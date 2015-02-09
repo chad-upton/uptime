@@ -20,7 +20,7 @@ Ping.index({ check: 1 });
 Ping.plugin(require('mongoose-lifecycle'));
 
 Ping.methods.findCheck = function(callback) {
-  return this.db.model('Check').findById(this.check, callback);
+  return this.db.model('Check').findById(this.check, callback).populate('owner', '-pass -date -id');
 };
 
 Ping.methods.setDetails = function(details) {

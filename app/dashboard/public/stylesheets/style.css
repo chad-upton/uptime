@@ -26,15 +26,15 @@ h3 {
   color: white;
 }
 
-#check_summary li {
+.check_summary li {
   padding-top: 2px;
 }
 
-#check_summary li strong {
+.check_summary li strong {
   font-size: 2.5em;
 }
 
-#check_summary li .label {
+.check_summary li .label {
   font-size: 1em;
   margin: 10px;
   vertical-align: 37%;
@@ -307,7 +307,24 @@ ul.nav-tabs li span {
     height: 270px;
   }
 }
+/* XS screens */
+@media screen and (max-width: 768px){
+  .check_summary{
+    margin-right: 10px;
+  }
+  .check_summary li{
+    float: right;
+  }
+  .check_summary li strong {
+    font-size: 1.5em !important;
+  }
 
+  .check_summary li .label {
+    font-size: 1em;
+    margin: 10px;
+    vertical-align: 37%;
+  }
+}
 .form-signin,.form-signup {
   max-width: 330px;
   padding: 15px;
@@ -341,4 +358,7 @@ ul.nav-tabs li span {
   margin-bottom: 10px;
   border-top-left-radius: 0;
   border-top-right-radius: 0;
+}
+.nopadding{
+  padding: 0px !important;
 }

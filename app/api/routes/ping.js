@@ -21,6 +21,10 @@ module.exports = function(app) {
       app.locals.user = req.session.user;
       next();
     } else {
+      /**
+       * @TODO middleware for api to login
+       */
+      console.log('Something is using an authed route',req.route.path);
       res.status(403)     // HTTP status 404: NotFound
         .send('Forbidden');
     }

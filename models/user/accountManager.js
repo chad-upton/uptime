@@ -11,7 +11,8 @@ var Account = new Schema({
   email        : String,
   user         : String,
   pass         : String,
-  date         : String
+  date         : String,
+  notificationSettings: Object
 });
 Account.plugin(require('mongoose-lifecycle'));
 

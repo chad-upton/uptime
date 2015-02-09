@@ -7,6 +7,7 @@ var CheckEvent       = require('../../../models/checkEvent');
 var CheckHourlyStat  = require('../../../models/checkHourlyStat');
 var CheckDailyStat   = require('../../../models/checkDailyStat');
 var CheckMonthlyStat = require('../../../models/checkMonthlyStat');
+var Account = require('../../../models/user/accountManager');
 
 /**
  * Check Routes
@@ -20,17 +21,21 @@ module.exports = function(app) {
       app.locals.user = req.session.user;
       next();
     } else {
+      /**
+       * @TODO middleware for api to login
+       */
+      console.log('Something is using an authed route',req.route.path);
       res.status(403)     // HTTP status 404: NotFound
         .send('Forbidden');
     }
     //next();
   };
-  app.get('/checks',isUser, function(req, res, next) {
-    var query = {};
+
+  app.get('/checks', function(req, res, next) {
+    var query = {owner: req.user.id};
     if (req.query.tag) {
       query.tags = req.query.tag;
     }
-    query.owner = req.user._id
     Check
     .find(query)
     .sort({ isUp: 1, lastChanged: -1 })
@@ -41,9 +46,6 @@ module.exports = function(app) {
   });
 
   app.get('/checks/needingPoll', function(req, res, next) {
-    /**
-     * @TODO Only uptime monitors can view this, use the useragent
-     */
     Check
     .needingPoll()
     .select({qos: 0})
@@ -69,6 +71,7 @@ module.exports = function(app) {
   };
 
 
+
   app.get('/checks/:id',isUser, loadCheck, function(req, res, next) {
     res.json(req.check);
   });
@@ -81,27 +84,28 @@ module.exports = function(app) {
         timestamp: new Date(),
         check: req.check,
         tags: req.check.tags,
+        owner: req.check.owner,
         message: req.check.isPaused ? 'paused' : 'restarted'
       }).save();
       res.redirect(app.route + '/checks/' + req.params.id);
     });
   });
 
-  app.put('/check/:id/test',isUser , function (req, res, next) {
+  app.put('/check/:id/test', function (req, res, next) {
     Check.update({ _id: req.params.id }, { lastTested: new Date() }, function(err, numberAffected) {
       if (err) return next(err);
       res.json({ numberAffected: numberAffected });
     });
   });
 
-  app.get('/checks/:id/stat/:period/:timestamp', isUser, loadCheck, function(req, res, next) {
+  app.get('/checks/:id/stat/:period/:timestamp',isUser, loadCheck, function(req, res, next) {
     req.check.getSingleStatForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
       if (err) return next(err);
       res.json(stat);
     });
   });
   
-  app.get('/checks/:id/stats/:type', loadCheck, function(req, res, next) {
+  app.get('/checks/:id/stats/:type',isUser, loadCheck, function(req, res, next) {
     req.check.getStatsForPeriod(req.params.type, req.query.begin, req.query.end, function(err, stats) {
       if(err) return next(err);
       res.json(stats);
@@ -111,6 +115,7 @@ module.exports = function(app) {
   app.get('/checks/:id/events',isUser, function(req, res, next) {
     var query = {
       check: req.params.id,
+      owner: req.user._id,
       timestamp: { $gte: req.query.begin || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     };
     if (req.query.end) {

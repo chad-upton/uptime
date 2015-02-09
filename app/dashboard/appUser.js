@@ -26,6 +26,19 @@ module.exports = function(app) {
     res.redirect('/dashboard/login');
   });
 
+  //userMiddleware
+  var isAuthed = function(req,res,next){
+    if(req.session.user) {
+      //@TODO Validate logged in user against database
+      req.user = req.session.user;
+      app.locals.user = req.session.user;
+      next();
+    } else {
+      app.locals.user = false;
+      res.redirect('/dashboard/signout');
+    }
+  };
+
   app.post('/login', function (req, res) {
     var user = req.param('user');
     var pass = req.param('pass');
@@ -95,6 +108,48 @@ module.exports = function(app) {
           }
         });
       }
+    });
+  });
+
+  app.get('/settings', isAuthed, function (req, res) {
+    Account.findOne({user: req.user.user}, function(e, o){
+      res.render('user/settings',{errors: [],user: o });
+    })
+  });
+
+  app.post('/settings', isAuthed, function (req, res) {
+    Account.findOne({user: req.user.user}, function(e, o) {
+      var notificationSettings = req.param('notifications');
+      var settings = req.param('settings');
+      settings = settings || {};
+      var newData = {};
+      var errors = [];
+      if (settings.newpw !== settings.newpwr) {
+        errors.push('Passwords do not match');
+      }
+      if(settings.newpw && !settings.oldpw){
+        errors.push('Please enter your old password');
+      }
+
+      if (errors.length === 0) {
+        newData.name 		= settings.name;
+        newData.email 	= settings.email;
+        newData.notificationSettings = notificationSettings;
+
+          if (settings.newpw==="" && settings.newpwr==="") {
+            Account.update({_id: o.id}, newData, {upsert: false}, function (err, r) {
+
+            });
+          } else {
+            Account.saltAndHash(settings.newpw, function (hash) {
+              newData.pass = hash;
+              Account.update({_id: o.id}, newData, {upsert: false}, function (err, r) {
+              });
+            });
+          }
+
+      }
+      res.redirect('/dashboard/settings');
     });
   });
 }

@@ -186,7 +186,9 @@ if (!module.parent) {
   var port = process.env.PORT || port;
   var host = process.env.HOST || serverUrl.hostname;
   server.listen(port, function(){
-    console.log("Express server listening on host %s, port %d in %s mode", host, port, app.settings.env);
+    var prefix = (config.ssl.enabled) ? 'https://' : 'http://';
+    host = prefix+host;
+    console.log("Express server listening on host %s:%d, in %s mode", host, port, app.settings.env);
   });
   server.on('error', function(e) {
     if (monitorInstance) {

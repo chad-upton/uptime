@@ -392,7 +392,7 @@ Check.statics.callForChecksNeedingPoll = function(callback) {
 };
 
 Check.statics.needingPoll = function() {
-  return this.$where(Check.methods.needsPoll);
+  return this.$where(Check.methods.needsPoll).populate('check.owner');
 };
 
 Check.statics.updateAllQos = function(callback) {

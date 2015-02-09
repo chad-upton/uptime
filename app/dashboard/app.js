@@ -182,7 +182,8 @@ app.delete('/checks/:id',isAuthed, function(req, res, next) {
 });
 
 app.get('/tags',isAuthed, function(req, res, next) {
-  Tag.find({owner: req.user._id}).sort({ name: 1 }).exec(function(err, tags) {
+  //{owner: req.user._id}
+  Tag.find().sort({ name: 1 }).exec(function(err, tags) {
     if (err) return next(err);
     res.render('tags', { info: req.flash('info'), tags: tags });
   });

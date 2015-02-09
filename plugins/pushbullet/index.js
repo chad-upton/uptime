@@ -29,50 +29,59 @@
  *       paused:    false
  *       restarted: false
  */
-var config     = require('config').pushbullet;
+var config = require('config').pushbullet;
 var CheckEvent = require('../../models/checkEvent');
+var Account = require('../../models/user/accountManager');
 var PushBullet = require('pushbullet');
 var moment = require('moment');
-var pusher = new PushBullet(config.apikey);
-exports.initWebApp = function() {
 
-  CheckEvent.on('afterInsert', function(checkEvent) {
-   /* if (!config.event[checkEvent.message])
-      return;*/
+exports.initWebApp = function () {
 
-    checkEvent.findCheck(function(err, check) {
+  CheckEvent.on('afterInsert', function (checkEvent) {
+    /* if (!config.event[checkEvent.message])
+     return;*/
+
+    checkEvent.findCheck(function (err, check) {
       if (err) {
         return console.error(err);
       }
-      var message;
-      if(checkEvent.message === 'up'){
-        message =  check.name + ' went back up after '+ moment.duration(checkEvent.downtime).humanize() +' of downtime';
-      } else {
-        message = "The application " + check.name + " just went to status " + checkEvent.message
-      }
-      var msg = {
-        message: message,
-        title: "Uptime Status",
-        sound: 'magic', // optional
-        priority: 1 // optional
-      };
-      var deviceParams = {};
-      pusher.note(deviceParams, msg.title, msg.message, function(error, response) {
-        // response is the JSON response from the API
-      });
-      /*var push     = new pushover({
-        token: config.token
-      });
-      push.user    = config.user;
-
-      push.send( msg, function( err, result ) {
-        if ( err ) {
-          throw err;
+      Account.findOne({_id: check.owner}, function (e, r) {
+        if (!r.notificationSettings) {
+          return
         }
-        console.log( result );
-      });*/
+        if (r.notificationSettings.pushbullet === "") {
+          return
+        }
+        var pusher = new PushBullet(r.notificationSettings.pushbullet);
+        var message;
+        if (checkEvent.message === 'up') {
+          message = check.name + ' went back up after ' + moment.duration(checkEvent.downtime).humanize() + ' of downtime';
+        } else {
+          message = "The application " + check.name + " just went to status " + checkEvent.message
+        }
+        var msg = {
+          message: message,
+          title: "Uptime Status",
+          sound: 'magic', // optional
+          priority: 1 // optional
+        };
+        var deviceParams = {};
+        pusher.note(deviceParams, msg.title, msg.message, function (error, response) {
+          // response is the JSON response from the API
+        });
+        /*var push     = new pushover({
+         token: config.token
+         });
+         push.user    = config.user;
 
+         push.send( msg, function( err, result ) {
+         if ( err ) {
+         throw err;
+         }
+         console.log( result );
+         });*/
 
+      });
     });
   });
   console.log('Enabled Pushbullet notifications');
