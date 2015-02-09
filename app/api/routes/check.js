@@ -75,7 +75,7 @@ module.exports = function(app) {
   app.get('/checks/:id',isUser, loadCheck, function(req, res, next) {
     res.json(req.check);
   });
-  
+
   app.get('/checks/:id/pause',isUser, loadCheck, function(req, res, next) {
     req.check.togglePause();
     req.check.save(function(err) {
@@ -104,14 +104,14 @@ module.exports = function(app) {
       res.json(stat);
     });
   });
-  
+
   app.get('/checks/:id/stats/:type',isUser, loadCheck, function(req, res, next) {
     req.check.getStatsForPeriod(req.params.type, req.query.begin, req.query.end, function(err, stats) {
       if(err) return next(err);
       res.json(stats);
     });
   });
-  
+
   app.get('/checks/:id/events',isUser, function(req, res, next) {
     var query = {
       check: req.params.id,
