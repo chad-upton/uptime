@@ -41,6 +41,9 @@ module.exports = function(app) {
   });
 
   app.get('/checks/needingPoll', function(req, res, next) {
+    /**
+     * @TODO Only uptime monitors can view this, use the useragent
+     */
     Check
     .needingPoll()
     .select({qos: 0})
