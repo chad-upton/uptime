@@ -94,7 +94,7 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/checks/:id/stat/:period/:timestamp', isUser, loadCheck, function(req, res, next) {
+  app.get('/checks/:id/stat/:period/:timestamp', loadCheck, function(req, res, next) {
     req.check.getSingleStatForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
       if (err) return next(err);
       res.json(stat);
