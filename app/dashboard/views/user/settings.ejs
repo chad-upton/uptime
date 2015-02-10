@@ -10,6 +10,7 @@
                 settings</a></li>
             <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Notification
                 settings</a></li>
+            <li role="presentation"><a href="#api" aria-controls="api" role="tab" data-toggle="tab">API Tokens</a></li>
           </ul>
 
           <!-- Tab panes -->
@@ -20,8 +21,6 @@
                 <div class="col-md-3 nopadding">
                   <label>Name<input type="text" value="<%= user.name %>" name="settings[name]" class="form-control"></label>
                   <label>E-mail <input type="text" value="<%= user.email %>" name="settings[email]" class="form-control"></label>
-                </div>
-                <div class="col-md-3 nopadding">
                   <label>Current password <input type="password" name="settings[oldpw]" class="form-control"></label>
                   <label>New password <input type="password" name="settings[newpw]" class="form-control"></label>
                   <label>new password (repeat)<input type="password" name="settings[newpwr]" class="form-control"> </label>
@@ -72,6 +71,31 @@
                 </label>
               </div>
             </div>
+            <div role="tabpanel" class="tab-pane fade" id="api">
+              <h2>Your api access tokens</h2>
+              <ul class="apiKeys">
+                <%  user.apiKeys.forEach(function(el, index) {
+                    var apiKey = user.apiKeys[index];
+                %>
+                  <li>
+                    <% if(apiKey.canDelete){ %>
+                      <div class="pull-right"><i class="fa fa-trash-o"></i> </div>
+                    <% } %>
+                    <div>Name: <%= apiKey.name %></div>
+                    <div>Description: <%= apiKey.description %></div>
+                    <div>Created: <%= moment(apiKey.created).format('LL HH:mm') %></div>
+                    <div>Last used: <%
+                      if(apiKey.lastAccessed ===0){ %>
+                            Never
+                      <% } else {%>
+                        <%= moment(apiKey.lastAccessed).format('LL HH:mm') %>
+                      <% }  %>
+                      <div>API Key: <input type="text" value="<%= apiKey.apiKey %>" class="apikey"></div>
+                    </div>
+                  </li>
+                <% }); %>
+              </ul>
+            </div>
           </div>
           <div class="form-group">
             <button type="submit" class="btn btn-primary">Save</button>
@@ -103,5 +127,6 @@
         $('#statusHubSettings').hide();
       }
     });
+    $(".apikey").focus(function() { $(this).select(); } );
   });
 </script>

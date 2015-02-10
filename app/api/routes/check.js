@@ -14,22 +14,19 @@ var Account = require('../../../models/user/accountManager');
  */
 module.exports = function(app) {
 
-  var isUser = function(req,res,next){
-    if(req.session.user) {
-      //@TODO Validate logged in user against database
-      req.user = req.session.user;
-      app.locals.user = req.session.user;
+  var isUser = function(req,res,next) {
+    Account.isUserAuthed(req,function(user){
+      req.user = user;
+      app.locals.user = user;
+      req.session.user = user;
       next();
-    } else {
-      /**
-       * @TODO middleware for api to login
-       */
-      console.log('Something is using an authed route',req.route.path);
+    }, function () {
       res.status(403)     // HTTP status 404: NotFound
         .send('Forbidden');
-    }
-    //next();
+      console.log('Something is using an authed route',req.route.path);
+    });
   };
+
 
   app.get('/checks',isUser, function(req, res, next) {
     var query = {owner: req.user._id};
@@ -60,7 +57,7 @@ module.exports = function(app) {
   // check route middleware
   var loadCheck = function(req, res, next) {
     Check
-    .find({ _id: req.params.id })
+    .find({ _id: req.params.id, owner: req.user._id })
     .select({qos: 0})
     .findOne(function(err, check) {
       if (err) return next(err);

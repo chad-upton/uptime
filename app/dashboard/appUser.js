@@ -6,6 +6,7 @@ var async = require('async');
 var partials = require('express-partials');
 var flash = require('connect-flash');
 var moment = require('moment');
+var crypto = require('crypto');
 
 var Check = require('../../models/check');
 var Tag = require('../../models/tag');
@@ -30,15 +31,14 @@ module.exports = function(app) {
 
   //userMiddleware
   var isAuthed = function(req,res,next){
-    if(req.session.user) {
-      //@TODO Validate logged in user against database
-      req.user = req.session.user;
-      app.locals.user = req.session.user;
+    Account.isUserAuthed(req,function(user){
+      req.user = user;
+      app.locals.user = user;
       next();
-    } else {
+    },function(){
       app.locals.user = false;
       res.redirect('/dashboard/signout');
-    }
+    });
   };
 
   app.post('/login', function (req, res) {
@@ -72,9 +72,18 @@ module.exports = function(app) {
   app.post('/signup', function (req, res) {
     var newUser = new Account();
     var errors = [];
+    var apiKey = [{
+      name: 'General api key',
+      description: 'For quick use',
+      apiKey: crypto.randomBytes(32).toString('hex'),
+      canDelete: false,
+      created: new Date(),
+      lastAccessed: 0
+    }];
     newUser.name = req.param('name');
     newUser.email = req.param('email');
     newUser.pass = req.param('pass');
+    newUser.apiKeys = apiKey;
     newUser.user = req.param('user');
     newUser.notificationSettings = {
       email: "",

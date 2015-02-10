@@ -4,6 +4,7 @@
 var express    = require('express');
 var Check      = require('../../models/check');
 var CheckEvent = require('../../models/checkEvent');
+var Account = require('../../models/user/accountManager');
 
 var app = module.exports = express();
 
@@ -35,61 +36,60 @@ Check.on('afterInsert', function() { upCount = undefined; });
 Check.on('afterRemove', function() { upCount = undefined; });
 CheckEvent.on('afterInsert', function() { upCount = undefined; });
 
-var isUser = function(req,res,next){
-  if(req.session.user) {
-    //@TODO Validate logged in user against database
-    req.user = req.session.user;
-    app.locals.user = req.session.user;
+var isUser = function(req,res,next) {
+  Account.isUserAuthed(req,function(user){
+    req.user = user;
+    app.locals.user = user;
     next();
-  } else {
+  }, function () {
     res.status(403)     // HTTP status 404: NotFound
       .send('Forbidden');
-  }
-  //next();
+  });
 };
 
-app.get('/checks/count', isUser, function(req, res, next) {
-  var count = { up: 0, down: 0, paused: 0, total: 0 };
+  app.get('/checks/count', isUser, function (req, res, next) {
+    var count = {up: 0, down: 0, paused: 0, total: 0};
 
-  Check
-    .find({ owner: req.user._id })
-    .select({ isUp: 1, isPaused: 1})
-    .exec(function(err, checks) {
-      if (err) return callback(err);
-      checks.forEach(function(check) {
-        //if(check.owner.toString() !=user._id.toString) return;
-        count.total++;
-        if (check.isPaused) {
-          count.paused++;
-        } else if (check.isUp) {
-          count.up++;
-        } else {
-          count.down++;
-        }
+    Check
+      .find({owner: req.user._id})
+      .select({isUp: 1, isPaused: 1})
+      .exec(function (err, checks) {
+        if (err) return callback(err);
+        checks.forEach(function (check) {
+          //if(check.owner.toString() !=user._id.toString) return;
+          count.total++;
+          if (check.isPaused) {
+            count.paused++;
+          } else if (check.isUp) {
+            count.up++;
+          } else {
+            count.down++;
+          }
+        });
+        res.json(count);
       });
-      res.json(count);
-    });
-});
+  });
 
 
 // Routes
 
-require('./routes/check')(app);
-require('./routes/tag')(app);
-require('./routes/ping')(app);
+  require('./routes/check')(app);
+  require('./routes/tag')(app);
+  require('./routes/ping')(app);
 
 // route list
-app.get('/', function(req, res) {
-  var routes = [];
-  for (var verb in app.routes) {
-    app.routes[verb].forEach(function(route) {
-      routes.push({method: verb.toUpperCase() , path: app.route + route.path});
-    });
-  }
-  res.json(routes);
-});
+  app.get('/', function (req, res) {
+    var routes = [];
+    for (var verb in app.routes) {
+      app.routes[verb].forEach(function (route) {
+        routes.push({method: verb.toUpperCase(), path: app.route + route.path});
+      });
+    }
+    res.json(routes);
+  });
 
-if (!module.parent) {
-  app.listen(3000);
-  console.log('Express started on port 3000');
-}
+  if (!module.parent) {
+    app.listen(3000);
+    console.log('Express started on port 3000');
+  }
+  ;

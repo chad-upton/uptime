@@ -19,7 +19,7 @@ var apiApp     = require('./app/api/app');
 var dashboardApp = require('./app/dashboard/app');
 var cookieParser = express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4');
 var connect = require('connect');
-
+var spdy = require('spdy');
 // database
 
 var mongoose   = require('./bootstrap');
@@ -41,7 +41,7 @@ if (config.ssl && config.ssl.enabled === true) {
     cert: fs.readFileSync(config.ssl.certificate),
     key: fs.readFileSync(config.ssl.key)
   };
-  var server = https.createServer(options, app);
+  var server = spdy.createServer(options, app);
 } else {
   var server = http.createServer(app);
 }

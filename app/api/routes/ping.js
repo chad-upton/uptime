@@ -5,7 +5,7 @@
 var Check      = require('../../../models/check');
 var CheckEvent = require('../../../models/checkEvent');
 var Ping       = require('../../../models/ping');
-
+var Account = require('../../../models/user/accountManager');
 /**
  * Check Routes
  */
@@ -14,21 +14,17 @@ module.exports = function(app) {
   /*
   User middleware
    */
-  var isUser = function(req,res,next){
-    if(req.session.user) {
-      //@TODO Validate logged in user against database
-      req.user = req.session.user;
-      app.locals.user = req.session.user;
+  var isUser = function(req,res,next) {
+    Account.isUserAuthed(req,function(user){
+      req.user = user;
+      app.locals.user = user;
+      req.session.user = user;
       next();
-    } else {
-      /**
-       * @TODO middleware for api to login
-       */
-      console.log('Something is using an authed route',req.route.path);
+    }, function () {
       res.status(403)     // HTTP status 404: NotFound
         .send('Forbidden');
-    }
-    //next();
+      console.log('Something is using an authed route',req.route.path);
+    });
   };
 
   // support 'check' and 'page' arguments in query string

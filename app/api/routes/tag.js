@@ -7,26 +7,23 @@ var Tag           = require('../../../models/tag');
 var TagHourlyStat = require('../../../models/tagHourlyStat');
 var CheckEvent    = require('../../../models/checkEvent');
 var async         = require('async');
+var Account = require('../../../models/user/accountManager');
 
 /**
  * Check Routes
  */
 module.exports = function(app) {
-  var isUser = function(req,res,next){
-    if(req.session.user) {
-      //@TODO Validate logged in user against database
-      req.user = req.session.user;
-      app.locals.user = req.session.user;
+  var isUser = function(req,res,next) {
+    Account.isUserAuthed(req,function(user){
+      req.user = user;
+      app.locals.user = user;
+      req.session.user = user;
       next();
-    } else {
-      /**
-       * @TODO middleware for api to login
-       */
-      console.log('Something is using an authed route',req.route.path);
+    }, function () {
       res.status(403)     // HTTP status 404: NotFound
         .send('Forbidden');
-    }
-    //next();
+      console.log('Something is using an authed route',req.route.path);
+    });
   };
 
   app.get('/tags', isUser, function(req, res) {
@@ -55,7 +52,7 @@ module.exports = function(app) {
 
   // tag route middleware
   var loadTag = function(req, res, next) {
-    Tag.findOne({ name: req.params.name,owner: req.user._id }, function(err, tag) {
+    Tag.findOne({ name: req.params.name }, function(err, tag) {
       if (err) return next(err);
       if (!tag) return res.json(404, { error: 'failed to load tag ' + req.params.name });
       req.tag = tag;

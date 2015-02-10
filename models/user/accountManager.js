@@ -12,11 +12,48 @@ var Account = new Schema({
   user         : String,
   pass         : String,
   date         : String,
-  notificationSettings: Object
+  notificationSettings: Object,
+  apiKeys: Array
 });
 Account.plugin(require('mongoose-lifecycle'));
 
+Account.statics.userExist = function(user, callback) {
+  return this.db.model('Account').findOne({user: user.user}, callback);
+};
 
+Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
+  /**
+   * FIXME Implement ability to end user sessions.
+   * Save and random hash in cookie, use that as auth.
+   * Then check for session.user.token (non exist yet)
+   * Look that up against the database.
+   */
+  if(req.query.apikey) {
+    /**
+     * Check for an api key:
+     *
+     */
+    this.db.model('Account').find({apiKeys:{ $elemMatch: {apiKey: req.query.apikey } } },function(e,r){
+
+      if(r === null){
+        errorCallback(req);
+      } else {
+        loggedInCallback(r);
+      }
+    });
+  } else {
+    this.db.model('Account').findOne({user: req.session.user.user}, function(e,r){
+      if(!req.session.user.pass || r === null){
+        errorCallback(req);
+        return;
+      }
+      if(r.pass === req.session.user.pass){
+        loggedInCallback(r);
+        return;
+      }
+    });
+  }
+};
 /* login validation methods */
 /*
 Account.methods.autoLogin = function(user, pass, callback)

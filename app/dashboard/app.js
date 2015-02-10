@@ -68,15 +68,14 @@ require('./appUser')(app);
 
 //userMiddleware
 var isAuthed = function(req,res,next){
-  if(req.session.user) {
-    //@TODO Validate logged in user against database
-    req.user = req.session.user;
-    app.locals.user = req.session.user;
+  Account.isUserAuthed(req,function(user){
+    req.user = user;
+    app.locals.user = user;
     next();
-  } else {
+  },function(){
     app.locals.user = false;
     res.redirect('/dashboard/signout');
-  }
+  });
 };
 
 /* End user routes */

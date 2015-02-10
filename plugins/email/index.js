@@ -63,9 +63,13 @@ exports.initWebApp = function(options) {
   CheckEvent.on('afterInsert', function(checkEvent) {
     if (!config.event[checkEvent.message]) return;
     checkEvent.findCheck(function(err, check) {
+      console.log(check);
       Account.findOne({_id: check.owner}, function (e, r) {
+        if(!r.notificationSettings){
+          return;
+        }
         if(r.notificationSettings.email == ""){
-          return
+          return;
         }
         if (err) return console.error(err);
         var filename = templateDir + checkEvent.message + '.ejs';
