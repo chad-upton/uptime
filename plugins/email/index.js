@@ -64,7 +64,7 @@ exports.initWebApp = function(options) {
     if (!config.event[checkEvent.message]) return;
     checkEvent.findCheck(function(err, check) {
       Account.findOne({_id: check.owner}, function (e, r) {
-        if(r.notificationSettings.email === ""){
+        if(r.notificationSettings.email == ""){
           return
         }
         if (err) return console.error(err);

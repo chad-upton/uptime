@@ -6,7 +6,6 @@ var http       = require('http');
 var https      = require('https');
 var url        = require('url');
 var express    = require('express');
-var cookieParser = require('cookie-parser');
 var config     = require('config');
 var socketIo   = require('socket.io');
 var fs         = require('fs');
@@ -18,6 +17,8 @@ var Ping       = require('./models/ping');
 var PollerCollection = require('./lib/pollers/pollerCollection');
 var apiApp     = require('./app/api/app');
 var dashboardApp = require('./app/dashboard/app');
+var cookieParser = express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4');
+var connect = require('connect');
 
 // database
 
@@ -134,6 +135,9 @@ app.emit('afterLastRoute', app);
 
 // Sockets
 var io = socketIo.listen(server);
+var sessionStore = new connect.middleware.session.MemoryStore();
+var SessionSockets = require('session.socket.io')
+  , sessionSockets = new SessionSockets(io, sessionStore, cookieParser);
 
 io.configure('production', function() {
   io.enable('browser client etag');
@@ -143,14 +147,14 @@ io.configure('production', function() {
 io.configure('development', function() {
   if (!config.verbose) io.set('log level', 1);
 });
+/*
 
-CheckEvent.on('afterInsert', function(event) {
-  io.sockets.emit('CheckEvent', event.toJSON());
-});
-
-io.sockets.on('connection', function(socket) {
+ */
+sessionSockets.on('connection', function (err, socket, session) {
   socket.on('set check', function(check) {
     socket.set('check', check);
+    //session.check = check;
+    //session.save();
   });
   Ping.on('afterInsert', function(ping) {
     socket.get('check', function(err, check) {
@@ -158,6 +162,9 @@ io.sockets.on('connection', function(socket) {
         socket.emit('ping', ping);
       }
     });
+  });
+  CheckEvent.on('afterInsert', function(event) {
+    socket.emit('CheckEvent', event.toJSON());
   });
 });
 
