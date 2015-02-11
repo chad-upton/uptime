@@ -23,11 +23,17 @@ module.exports = function(app) {
   });
 
   app.get('/signout', function (req, res) {
-    req.session.sessionHash = {};
-    delete req.session.sessionHash;
-    app.locals.sessionHash = false;
-    res.clearCookie('sessionHash');
-    res.redirect('/dashboard/login');
+    Session.getSessionById(req.session.sessionHash._id,function(session) {
+      if (session) {
+        Session.endSession(session);
+      }
+      req.session.sessionHash = {};
+      delete req.session.sessionHash;
+      app.locals.sessionHash = false;
+      req.session = null;
+      res.clearCookie('sessionHash');
+      res.redirect('/dashboard/login');
+    });
   });
 
   //userMiddleware
@@ -52,15 +58,16 @@ module.exports = function(app) {
         Account.validatePassword(pass, o.pass, function(err, r) {
           if (r){
             var userAgent = req.headers['user-agent'];
-            var ip = req.connection.remoteAddress;
+            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
             Session.startSession(o, ip,userAgent,function(session){
                 delete session.userAgent;
                 delete session.lastAction;
                 delete session.date;
                 req.session.sessionHash = session[0];
-                res.cookie('sessionHash', session, { maxAge:  24 * 60 * 60 * 1000 });
-                if (req.param('sessionHash') == 'on'){
-                  res.cookie('pass', session, { maxAge:  365 * 24 * 60 * 60 * 1000 });
+                //res.cookie('sessionHash', session, { maxAge:  24 * 60 * 60 * 1000 });
+                if (req.param('remember-me') == 'on'){
+                  req.session.cookie.expires = false;
+                  //res.cookie('pass', session, { maxAge:  365 * 24 * 60 * 60 * 1000 });
                 }
                 res.redirect('/dashboard/events');
             });

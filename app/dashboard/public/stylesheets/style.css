@@ -336,3 +336,14 @@ ul.nav-tabs li span {
   max-width: 350px;
   margin-bottom: 10px;
 }
+@media (max-width: 768px) {
+  .check_summary {
+    margin-right: 15px;
+  }
+  .check_summary li {
+    float: left;
+  }
+  .check_summary li strong {
+    font-size: 20px;
+  }
+}

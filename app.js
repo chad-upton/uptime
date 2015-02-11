@@ -53,7 +53,7 @@ app.configure(function(){
     key:    'uptime',
     secret: 'FZ5HEE5YHD3E566756234C45BY4DSFZ4',
     proxy:  true,
-    cookie: { maxAge: 60 * 60 * 1000 }
+    cookie: { maxAge: 24*60 * 60 * 1000 }
   }));
   app.use(app.router);
   // the following middlewares are only necessary for the mounted 'dashboard' app,

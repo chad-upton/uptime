@@ -62,8 +62,8 @@
           <a class="navbar-brand" href="#">Uptime</a>
           <% if(typeof user ==="object"){ %>
             <ul class="nav navbar-nav pull-right visible-xs check_summary">
-              <li class="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
               <li class="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
+              <li class="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
             </ul>
           <% } %>
         </div>
@@ -128,7 +128,7 @@
           console.log('Ajax error:')
           console.log(event,xhr,settings,error);
           if(xhr.status === 403){
-            window.location.href = "<%= route %>/logout";
+            //window.location.href = "<%= route %>/signout";
           }
         });
         var changeFavicon = function(red) {
