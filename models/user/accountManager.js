@@ -2,8 +2,8 @@ var crypto 		= require('crypto');
 var mongoose = require('mongoose');
 var Schema   = mongoose.Schema;
 var moment 		= require('moment');
-
-
+var Session = require('./sessionManager');
+var assert = require('assert');
 
 // main model
 var Account = new Schema({
@@ -42,16 +42,22 @@ Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
       }
     });
   } else {
-    this.db.model('Account').findOne({user: req.session.user.user}, function(e,r){
-      if(!req.session.user.pass || r === null){
-        errorCallback(req);
-        return;
-      }
-      if(r.pass === req.session.user.pass){
-        loggedInCallback(r);
-        return;
-      }
-    });
+    if(req.session.sessionHash) {
+      var searchFor = req.session.sessionHash;
+      delete searchFor.user;
+      Session.getSessionFromUser(searchFor,function (storedSession) {
+        if(storedSession !== null && storedSession.user){
+          var now = new Date();
+          Session.setLastAccessed(storedSession,now);
+          loggedInCallback(storedSession.user);
+        } else {
+          errorCallback(req);
+        }
+      });
+    } else {
+      errorCallback(req);
+      return;
+    }
   }
 };
 /* login validation methods */

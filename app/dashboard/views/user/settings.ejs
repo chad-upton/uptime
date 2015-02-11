@@ -11,6 +11,7 @@
             <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Notification
                 settings</a></li>
             <li role="presentation"><a href="#api" aria-controls="api" role="tab" data-toggle="tab">API Tokens</a></li>
+            <li role="presentation"><a href="#sessions" aria-controls="api" role="tab" data-toggle="tab">Sessions</a></li>
           </ul>
 
           <!-- Tab panes -->
@@ -95,6 +96,31 @@
                   </li>
                 <% }); %>
               </ul>
+            </div> <div role="tabpanel" class="tab-pane fade" id="sessions">
+              <h2>Your active sessions</h2>
+              <ul class="sessions">
+                <%  sessions.forEach(function(el, index) {
+                  var session = sessions[index];
+                %>
+                <li>
+                  <div class="pull-right"><i class="fa fa-trash-o" session-id="<%= session._id %>"></i> </div>
+                  <% if(curSession.sessionHash === session.sessionHash){ %>
+                   [current session]
+                  <% } %>
+                  <div>IP: <%= session.ip %></div>
+                  <div>Created: <%= moment(session.date).format('LL HH:mm') %></div>
+                  <div>Last used: <%
+                    if(session.lastAction ===0){ %>
+                    Never
+                    <% } else {%>
+
+                    <%= moment.duration(new Date() - session.lastAction).humanize() %> ago
+                    <% }  %>
+                    <div>Browser: <%= session.userAgent %></div>
+                  </div>
+                </li>
+                <% }); %>
+              </ul>
             </div>
           </div>
           <div class="form-group">
@@ -128,5 +154,17 @@
       }
     });
     $(".apikey").focus(function() { $(this).select(); } );
+
+    $('.sessions .fa-trash-o').click(function(){
+      var sessionId = $(this).attr('session-id');
+      var _ele = $(this);
+      $.ajax({
+        url: '<%= route %>/settings/endsession/'+sessionId,
+        type: 'DELETE',
+        success: function(result) {
+          _ele.parent().parent().slideUp();
+        }
+      });
+    })
   });
 </script>

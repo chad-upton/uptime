@@ -324,10 +324,12 @@ ul.nav-tabs li span {
 .nopadding {
   padding: 0px !important;
 }
-.apiKeys {
+.apiKeys,
+.sessions {
   padding: 0;
 }
-.apiKeys li {
+.apiKeys li,
+.sessions li {
   list-style: none;
   background-color: #D0E9FF;
   padding: 10px;

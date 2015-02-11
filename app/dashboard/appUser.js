@@ -15,6 +15,7 @@ var TagMonthlyStat = require('../../models/tagMonthlyStat');
 var CheckMonthlyStat = require('../../models/checkMonthlyStat');
 var moduleInfo = require('../../package.json');
 var Account = require('../../models/user/accountManager');
+var Session = require('../../models/user/sessionManager');
 
 module.exports = function(app) {
   app.get('/login', function (req, res) {
@@ -22,10 +23,10 @@ module.exports = function(app) {
   });
 
   app.get('/signout', function (req, res) {
-    delete req.session.user;
-    app.locals.user = false;
-    res.clearCookie('user');
-    res.clearCookie('pass');
+    req.session.sessionHash = {};
+    delete req.session.sessionHash;
+    app.locals.sessionHash = false;
+    res.clearCookie('sessionHash');
     res.redirect('/dashboard/login');
   });
 
@@ -50,12 +51,20 @@ module.exports = function(app) {
       }	else{
         Account.validatePassword(pass, o.pass, function(err, r) {
           if (r){
-            req.session.user = o;
-            if (req.param('remember-me') == 'on'){
-              res.cookie('user', o.user, { maxAge:  365 * 24 * 60 * 60 * 1000 });
-              res.cookie('pass', o.pass, { maxAge:  365 * 24 * 60 * 60 * 1000 });
-            }
-            res.redirect('/dashboard/events');
+            var userAgent = req.headers['user-agent'];
+            var ip = req.connection.remoteAddress;
+            Session.startSession(o, ip,userAgent,function(session){
+                delete session.userAgent;
+                delete session.lastAction;
+                delete session.date;
+                req.session.sessionHash = session[0];
+                res.cookie('sessionHash', session, { maxAge:  24 * 60 * 60 * 1000 });
+                if (req.param('sessionHash') == 'on'){
+                  res.cookie('pass', session, { maxAge:  365 * 24 * 60 * 60 * 1000 });
+                }
+                res.redirect('/dashboard/events');
+            });
+           /* req.session.user = o;*/
           }	else{
 
             res.render('user/login',{ errors: ['Invalid password'] } );
@@ -105,7 +114,9 @@ module.exports = function(app) {
     if(newUser.name===''){
       errors.push('Fill in a name');
     }
-
+    /*
+    FIXME Put this for godssake in accountmanager
+     */
     Account.findOne({user: newUser.user}, function (e, o) {
       if (o) {
         res.render('user/signup',{errors: ['Sorry this username is taken']});
@@ -131,11 +142,13 @@ module.exports = function(app) {
 
   app.get('/settings', isAuthed, function (req, res) {
     Account.findOne({user: req.user.user}, function(e, o){
-      if(o) {
-        res.render('user/settings', {errors: [], user: o});
-      } else {
-        res.redirect('/dashboard/login');
-      }
+      Session.getSessionsFromUser(o,function(sessions){
+        if(o) {
+          res.render('user/settings', {errors: [], user: o, sessions: sessions,curSession: req.session.sessionHash});
+        } else {
+          res.redirect('/dashboard/login');
+        }
+      });
     })
   });
 
@@ -173,5 +186,18 @@ module.exports = function(app) {
       }
       res.redirect('/dashboard/settings');
     });
+  });
+
+  app.delete('/settings/endsession/:sessionId', function (req, res) {
+    var result = {'test': 'hi'};
+    Session.getSessionById(req.params.sessionId,function(session){
+      if(session) {
+        Session.endSession(session);
+        result = 'success'
+      } else {
+        result = {'error': 'session not found'}
+      }
+    });
+    res.json(result)
   });
 }
