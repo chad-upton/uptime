@@ -23,17 +23,22 @@ module.exports = function(app) {
   });
 
   app.get('/signout', function (req, res) {
-    Session.getSessionById(req.session.sessionHash._id,function(session) {
-      if (session) {
-        Session.endSession(session);
-      }
-      req.session.sessionHash = {};
-      delete req.session.sessionHash;
-      app.locals.sessionHash = false;
-      req.session = null;
-      res.clearCookie('sessionHash');
+    if(req.session.sessionHash) {
+      Session.getSessionById(req.session.sessionHash._id, function (session) {
+        if (session) {
+          Session.endSession(session);
+        }
+        req.session.sessionHash = {};
+        delete req.session.sessionHash;
+        app.locals.sessionHash = false;
+        app.locals.user = false;
+        req.session = null;
+        res.clearCookie('sessionHash');
+        res.redirect('/dashboard/login');
+      });
+    } else {
       res.redirect('/dashboard/login');
-    });
+    }
   });
 
   //userMiddleware
