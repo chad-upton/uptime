@@ -22,12 +22,6 @@ Account.statics.userExist = function(user, callback) {
 };
 
 Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
-  /**
-   * FIXME Implement ability to end user sessions.
-   * Save and random hash in cookie, use that as auth.
-   * Then check for session.user.token (non exist yet)
-   * Look that up against the database.
-   */
   if(req.query.apikey) {
     /**
      * Check for an api key:
@@ -55,6 +49,7 @@ Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
         }
       });
     } else {
+      /** @TODO check sessionhash cookie */
       errorCallback(req);
       return;
     }

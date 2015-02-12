@@ -16,9 +16,6 @@ var Session = new Schema({
 
 });
 Session.plugin(require('mongoose-lifecycle'));
-/**
- * @TODO End sessions after 24 hour with the lastAction property
- */
 
 
 /**
@@ -28,7 +25,7 @@ Session.plugin(require('mongoose-lifecycle'));
  * @param useragent {string} User agent of the session
  */
 Session.statics.startSession =  function(user,ip,useragent,callback) {
-  console.log('Creating a session for',user._id,ip,useragent);
+  //console.log('Creating a session for',user._id,ip,useragent);
 
   var newSession = {
     user: user._id,

@@ -131,7 +131,7 @@ DateNavigation.prototype.redrawPeriods = function() {
   $('#dateNavigation .periods').html(periods);
   var _self = this;
   autoWidthPerioid = function(){
-    console.log(_self.interval.type);
+    //console.log(_self.interval.type);
     var containerWidth = $(window).width()*0.8333333333;
 
 

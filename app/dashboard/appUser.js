@@ -69,10 +69,10 @@ module.exports = function(app) {
                 delete session.lastAction;
                 delete session.date;
                 req.session.sessionHash = session[0];
-                //res.cookie('sessionHash', session, { maxAge:  24 * 60 * 60 * 1000 });
+                res.cookie('sessionHash', session, { maxAge:  24 * 60 * 60 * 1000 });
                 if (req.param('remember-me') == 'on'){
                   req.session.cookie.expires = false;
-                  //res.cookie('pass', session, { maxAge:  365 * 24 * 60 * 60 * 1000 });
+                  res.cookie('sessionHash', session, { maxAge:  365 * 24 * 60 * 60 * 1000 });
                 }
                 res.redirect('/dashboard/events');
             });

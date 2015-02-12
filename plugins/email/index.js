@@ -63,7 +63,7 @@ exports.initWebApp = function(options) {
   CheckEvent.on('afterInsert', function(checkEvent) {
     if (!config.event[checkEvent.message]) return;
     checkEvent.findCheck(function(err, check) {
-      console.log(check);
+      //console.log(check);
       Account.findOne({_id: check.owner}, function (e, r) {
         if(!r.notificationSettings){
           return;
@@ -94,7 +94,7 @@ exports.initWebApp = function(options) {
         };
         mailer.sendMail(mailOptions, function (err2, response) {
           if (err2) return console.error('Email plugin error: %s', err2);
-          console.log('Notified event by email: Check ' + check.name + ' ' + checkEvent.message);
+          //console.log('Notified event by email: Check ' + check.name + ' ' + checkEvent.message);
         });
       });
     });
