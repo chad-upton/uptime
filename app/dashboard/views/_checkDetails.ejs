@@ -5,69 +5,108 @@
     <form id="check_form" method="post" class="form-vertical" action="<%= route %>/checks<%= check.isNew ? '' : '/' + check._id %>">
         <input type="hidden" name="_method" value="<%= (check.isNew) ? 'post' : 'put' %>" />
 
-        <div class="form-group">
-            <label class="control-label">Name</label>
-            <input type="text" name="check[name]" value="<%= check.name || '' %>" class="form-control col-sm-6" placeholder="Type a name here"/>
-        </div>
+          <div class="form-group">
+              <label class="control-label">Name</label>
+              <input type="text" name="check[name]" value="<%= check.name || '' %>" class="form-control col-sm-6" placeholder="Type a name here"/>
+          </div>
 
-        <div class="form-group">
-            <label class="control-label">Url</label>
-            <input type="text" required name="check[url]" value="<%= check.url || '' %>" class="form-control col-sm-6"  placeholder="http://www.example.com"/>
-        </div>
-        <div class="form-group">
-            <label class="control-label">StatusHub Id</label>
-            <input type="text" name="check[statusHubId]" value="<%= check.statusHubId || '' %>" class="form-control col-sm-6" placeholder="id number here"/>
-        </div>
+          <div class="form-group">
+              <label class="control-label">Url</label>
+              <input type="text" required name="check[url]" value="<%= check.url || '' %>" class="form-control col-sm-6"  placeholder="http://www.example.com"/>
+          </div>
 
-        <div class="form-group">
-            <label class="control-label">Type</label>
-            <select name="check[type]" value="<% check.type || '' %>" class="form-control">
-                <option value="">auto</option>
-                <% pollerCollection.getTypes().forEach(function(poller) { %>
-                <option value="<%= poller %>" <% if (poller === check.type) { %> selected="true" <% } %>><%= poller %></option>
-                <% }) %>
-            </select>
-        </div>
+          <div class="form-group">
+              <label class="control-label">Type</label>
+              <select name="check[type]" value="<% check.type || '' %>" class="form-control">
+                  <option value="">auto</option>
+                  <% pollerCollection.getTypes().forEach(function(poller) { %>
+                  <option value="<%= poller %>" <% if (poller === check.type) { %> selected="true" <% } %>><%= poller %></option>
+                  <% }) %>
+              </select>
+          </div>
+          <div class="col-xs-12 col-sm-6 col-md-6">
+            <div class="form-group">
+                <label class="control-label">Polling interval</label>
+                <div class="input-group col-sm-4">
+                    <% if (check.lastTested) { %>
+                    <span class="input-group-addon" name="pause">
+                        <i class="fa fa-<%= check.isPaused ? 'play' : 'pause' %>"></i>
+                    </span>
+                    <% } %>
+                    <input type="text" name="check[interval]" value="<%= (check.interval / 1000).toFixed() %>" class="form-control" />
+                    <span class="input-group-addon">s</span>
+                </div>
+            </div>
 
-        <div class="form-group">
-            <label class="control-label">Polling interval</label>
-            <div class="input-group col-sm-3">
-                <% if (check.lastTested) { %>
-                <span class="input-group-addon" name="pause">
-                    <i class="fa fa-<%= check.isPaused ? 'play' : 'pause' %>"></i>
-                </span>
-                <% } %>
-                <input type="text" name="check[interval]" value="<%= (check.interval / 1000).toFixed() %>" class="form-control" />
-                <span class="input-group-addon">s</span>
+            <div class="form-group">
+                <label class="control-label">Slow threshold</label>
+                <div class="input-group col-sm-4">
+                    <input type="text" name="check[maxTime]" value="<%= check.maxTime %>" class="form-control" />
+                    <span class="input-group-addon">ms</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Alert threshold</label>
+                <div class="input-group col-sm-4">
+                    <input type="text" name="check[alertTreshold]" value="<%= check.alertTreshold %>" class="form-control" />
+                    <span class="input-group-addon">failed pings</span>
+                </div>
+            </div>
+
+            <span id="pollerDetails">
+                <%- pollerDetails %>
+            </span>
+
+            <div class="form-group">
+                <label class="control-label">Tags</label>
+                <textarea name="check[tags]" rows="2" class="form-control"><%= check.tags.join(', ') %></textarea>
+              <p class="muted">Seperate tags with a comma</p>
             </div>
         </div>
+        <div class="col-xs-12 col-sm-6 col-md-6">
+          <label class="control-label">Enabled notification services</label>
+          <div class="checkbox">
+            <label class="checkbox">
+              <input type="checkbox" name="check[notifiers][email][value]" value="<%= user.email %>"
+                      <% if(user.email === user.notificationSettings.email.value || check.notifiers.email) { %>
+                     checked="checked"
+                      <% } %>
 
-        <div class="form-group">
-            <label class="control-label">Slow threshold</label>
-            <div class="input-group col-sm-3">
-                <input type="text" name="check[maxTime]" value="<%= check.maxTime %>" class="form-control" />
-                <span class="input-group-addon">ms</span>
+                      >E-mail
+            </label>
+          </div>
+          <div class="checkbox">
+            <label class="checkbox">
+              <input type="checkbox" id="pushBullet"
+                      <% if(user.notificationSettings.pushbullet.apikey !== "" || check.notifiers.pushbullet) { %>
+                     checked="checked"
+                      <% } %> > Pushbullet<br/>
+            </label>
+            <div id="pushBulletSettings" style="display: none">
+              API Key: <input class="form-control" style="max-width: 200px;" type="text" value="<%= user.notificationSettings.pushbullet.apikey %>"
+                              name="check[notifiers][pushbullet][apikey]" placeholder="Enter your Pushbullet api key">
             </div>
-        </div>
 
-        <div class="form-group">
-            <label class="control-label">Alert threshold</label>
-            <div class="input-group col-sm-3">
-                <input type="text" name="check[alertTreshold]" value="<%= check.alertTreshold %>" class="form-control" />
-                <span class="input-group-addon">failed pings</span>
+          </div>
+          <% if(user.notificationSettings.statushub.apikey !='' || check['statusHubId'] ) {%>
+          <div class="checkbox">
+            <label class="checkbox">
+              <input type="checkbox" id="statusHub"
+                      <% if(user.notificationSettings.statushub.apikey) { %>
+                     checked="checked"
+                      <% } %>
+                      > Statushub<br/>
+            </label>
+            <div class="form-group">
+              <label class="control-label">StatusHub Id</label>
+              <input type="text" name="check[statusHubId]" value="<%= check.statusHubId || '' %>" class="form-control col-sm-6" placeholder="id number here"/>
             </div>
+
+          </div>
+          <% } %>
         </div>
-
-        <span id="pollerDetails">
-            <%- pollerDetails %>
-        </span>
-
-        <div class="form-group">
-            <label class="control-label">Tags</label>
-            <textarea name="check[tags]" rows="2" class="form-control"><%= check.tags.join(', ') %></textarea>
-          <p class="muted">Seperate tags with a comma</p>
-        </div>
-
+        <br style="clear: both;">
         <% if (check.lastTested) { %>
         <div class="form-group">
             <label class="control-label">Last edited on</label>

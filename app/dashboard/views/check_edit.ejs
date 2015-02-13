@@ -1,8 +1,14 @@
 <script src="<%= route %>/javascripts/checkState.js"></script>
 <div style="float: right;">
-  <span id="check_24h"></span>
+
 </div>
-<h1 class="page-header">Edit check "<%= check.name %>"</h1>
+<h1 class="page-header">
+  <div class="pull-right">
+    <small id="check_24h"></small>
+  </div>
+  Edit check "<%= check.name %>"
+  <a href="<%= check.url %>" target="_blank"><img src="<%= route %>/images/external-link-ltr-icon.png"></a>
+</h1>
 <% if (info.length) { %>
 <div class="alert alert-success"><%= info %></div>
 <% } %>

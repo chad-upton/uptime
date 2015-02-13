@@ -45,43 +45,40 @@ exports.initWebApp = function () {
       if (err) {
         return console.error(err);
       }
-      Account.findOne({_id: check.owner}, function (e, r) {
-        if (!r.notificationSettings) {
-          return
-        }
-        if (r.notificationSettings.pushbullet === "") {
-          return
-        }
-        var pusher = new PushBullet(r.notificationSettings.pushbullet);
-        var message;
-        if (checkEvent.message === 'up') {
-          message = check.name + ' went back up after ' + moment.duration(checkEvent.downtime).humanize() + ' of downtime';
-        } else {
-          message = "The application " + check.name + " just went to status " + checkEvent.message
-        }
-        var msg = {
-          message: message,
-          title: "Uptime Status",
-          sound: 'magic', // optional
-          priority: 1 // optional
-        };
-        var deviceParams = {};
-        pusher.note(deviceParams, msg.title, msg.message, function (error, response) {
-          // response is the JSON response from the API
-        });
-        /*var push     = new pushover({
-         token: config.token
-         });
-         push.user    = config.user;
 
-         push.send( msg, function( err, result ) {
-         if ( err ) {
-         throw err;
-         }
-         console.log( result );
-         });*/
-
+      if (!check.notifiers.pushbullet) {
+        return
+      }
+      var pusher = new PushBullet(check.notifiers.pushbullet.apikey);
+      var message;
+      if (checkEvent.message === 'up') {
+        message = check.name + ' went back up after ' + moment.duration(checkEvent.downtime).humanize() + ' of downtime';
+      } else {
+        message = "The application " + check.name + " just went to status " + checkEvent.message
+      }
+      var msg = {
+        message: message,
+        title: "Uptime Status",
+        sound: 'magic', // optional
+        priority: 1 // optional
+      };
+      var deviceParams = {};
+      pusher.note(deviceParams, msg.title, msg.message, function (error, response) {
+        // response is the JSON response from the API
       });
+      /*var push     = new pushover({
+       token: config.token
+       });
+       push.user    = config.user;
+
+       push.send( msg, function( err, result ) {
+       if ( err ) {
+       throw err;
+       }
+       console.log( result );
+       });*/
+
+
     });
   });
   console.log('Enabled Pushbullet notifications');

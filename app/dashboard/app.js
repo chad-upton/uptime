@@ -37,6 +37,10 @@ app.configure(function(){
     res.locals.moment = moment;
     next();
   });
+  app.use(function (req, res, next) {
+    res.removeHeader("x-powered-by");
+    next();
+  });
   app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
   /*app.use(express.cookieSession({
     key:    'uptime',
@@ -107,6 +111,7 @@ app.post('/checks',isAuthed, function(req, res, next) {
     return next(err);
   }
   check.owner = req.user._id;
+  check.notifiers = req.param('notifiers');
   check.save(function(err) {
     if (err) return next(err);
     req.flash('info', 'New check has been created');
@@ -154,12 +159,12 @@ app.put('/checks/:id',isAuthed, function(req, res, next) {
     } catch (populationError) {
       return next(populationError);
     }
-    if(check.owner != req.user._id){
+    /*if(check.owner != req.user._id){
       console.log('Illegal save detected');
       req.flash('info', 'Changes not saved');
       res.redirect(app.route + '/checks/' + req.params.id);
-    }
-
+    }*/
+    check.notifiers = req.param('check').notifiers;
     check.save(function(err2) {
       if (err2) return next(err2);
       req.flash('info', 'Changes have been saved');

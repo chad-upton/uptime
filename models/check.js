@@ -32,7 +32,9 @@ var Check = new Schema({
   qos         : {},
   pollerParams : Schema.Types.Mixed,
   statusHubId : Number,
-  owner: { type: Schema.ObjectId, ref: 'Account' }
+  owner: { type: Schema.ObjectId, ref: 'Account' },
+  notifiers: Object
+
 });
 Check.plugin(require('mongoose-lifecycle'));
 

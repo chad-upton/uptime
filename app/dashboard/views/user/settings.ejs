@@ -33,8 +33,8 @@
 
               <div class="checkbox">
                 <label class="checkbox">
-                  <input type="checkbox" name="notifications[email]" value="<%= user.email %>"
-                  <% if(user.email === user.notificationSettings.email) { %>
+                  <input type="checkbox" name="notifications[email][value]" value="<%= user.email %>"
+                  <% if(user.email === user.notificationSettings.email.value) { %>
                           checked="checked"
                   <% } %>
 
@@ -44,15 +44,15 @@
               <div class="checkbox">
                 <label class="checkbox">
                   <input type="checkbox" id="pushBullet"
-                   <% if(user.notificationSettings.pushbullet !== "") { %>
+                   <% if(user.notificationSettings.pushbullet.apikey !== "") { %>
                      checked="checked"
                   <% } %> > Pushbullet<br/>
-
-                  <div id="pushBulletSettings" style="display: none">
-                    API Key: <input class="form-control" style="max-width: 200px;" type="text" value="<%= user.notificationSettings.pushbullet %>"
-                                    name="notifications[pushbullet]" placeholder="Enter your Pushbullet api key">
-                  </div>
                 </label>
+                  <div id="pushBulletSettings" style="display: none">
+                    API Key: <input class="form-control" style="max-width: 200px;" type="text" value="<%= user.notificationSettings.pushbullet.apikey %>"
+                                    name="notifications[pushbullet][apikey]" placeholder="Enter your Pushbullet api key">
+                  </div>
+
               </div>
               <div class="checkbox">
                 <label class="checkbox">
@@ -61,7 +61,7 @@
                          checked="checked"
                           <% } %>
                           > Statushub<br/>
-
+                </label>
                   <div id="statusHubSettings" style="display: none">
                     Subdomains: <input class="form-control" style="max-width: 200px;" type="text"
                                        name="notifications[statushub][subdomains]"
@@ -69,7 +69,7 @@
                     API Key: <input class="form-control" style="max-width: 200px;" type="text"
                                     name="notifications[statushub][apikey]" placeholder="Enter your Pushbullet api key">
                   </div>
-                </label>
+
               </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="api">

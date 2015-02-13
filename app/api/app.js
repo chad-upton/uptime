@@ -14,6 +14,10 @@ var debugErrorHandler = function() {
 
 // middleware
 app.configure(function(){
+  app.use(function (req, res, next) {
+    res.removeHeader("x-powered-by");
+    next();
+  });
   app.use(app.router);
 });
 
@@ -92,4 +96,3 @@ var isUser = function(req,res,next) {
     app.listen(3000);
     console.log('Express started on port 3000');
   }
-  ;

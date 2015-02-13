@@ -74,14 +74,15 @@ Session.statics.getSessionFromUser =  function(session,callback) {
  *
  * @param sessionHash {object} session object
  */
-Session.statics.setLastAccessed =  function(sessionHash,time) {
-  sessionHash.lastAction = time;
+Session.statics.setLastAccessed =  function(sessionHash,time,req) {
   //sessionHash.user = sessionHash.user._id;
   this.db.model('Session').findOne({_id: sessionHash._id}, function (err, session) {
     if (err) {
       return;
     }
-    session.lastAction = new Date();
+    session.lastAction = time;
+    session.userAgent = req.headers['user-agent'];
+    session.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
     session.save(function (err) {
        if(err){
          console.log('Error updating session doc', err)

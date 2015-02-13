@@ -39,18 +39,36 @@ Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
     if(req.session.sessionHash) {
       var searchFor = req.session.sessionHash;
       delete searchFor.user;
+      delete searchFor.ip;
       Session.getSessionFromUser(searchFor,function (storedSession) {
         if(storedSession !== null && storedSession.user){
           var now = new Date();
-          Session.setLastAccessed(storedSession,now);
+          Session.setLastAccessed(storedSession,now,req);
           loggedInCallback(storedSession.user);
         } else {
           errorCallback(req);
         }
       });
     } else {
-      /** @TODO check sessionhash cookie */
-      errorCallback(req);
+      if (req.cookies.sessionHash) {
+        var searchFor = req.cookies.sessionHash;
+        delete searchFor.user;
+        delete searchFor.ip;
+        if(searchFor instanceof Array){
+          searchFor = searchFor[0];
+        }
+        Session.getSessionFromUser(searchFor, function (storedSession) {
+          if (storedSession !== null && storedSession.user) {
+            var now = new Date();
+            Session.setLastAccessed(storedSession, now, req);
+            loggedInCallback(storedSession.user);
+          } else {
+            errorCallback(req);
+          }
+        });
+      } else {
+        //errorCallback(req);
+      }
       return;
     }
   }

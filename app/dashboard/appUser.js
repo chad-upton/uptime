@@ -69,7 +69,7 @@ module.exports = function(app) {
                 delete session.lastAction;
                 delete session.date;
                 req.session.sessionHash = session[0];
-                res.cookie('sessionHash', session, { maxAge:  24 * 60 * 60 * 1000 });
+                res.cookie('sessionHash', session[0], { maxAge:  24 * 60 * 60 * 1000 });
                 if (req.param('remember-me') == 'on'){
                   req.session.cookie.expires = false;
                   res.cookie('sessionHash', session, { maxAge:  365 * 24 * 60 * 60 * 1000 });
@@ -107,11 +107,18 @@ module.exports = function(app) {
     newUser.apiKeys = apiKey;
     newUser.user = req.param('user');
     newUser.notificationSettings = {
-      email: "",
-      pushbullet: "",
+      email: {
+        value: "",
+        isDefault: false
+      },
+      pushbullet: {
+        apikey: "",
+        isDefault: false
+      },
       statushub:{
         subdomains: "",
-        apikey: ""
+        apikey: "",
+        isDefault: false
       }
     };
     if(newUser.name===''){
@@ -126,9 +133,6 @@ module.exports = function(app) {
     if(newUser.name===''){
       errors.push('Fill in a name');
     }
-    /*
-    FIXME Put this for godssake in accountmanager
-     */
     Account.findOne({user: newUser.user}, function (e, o) {
       if (o) {
         res.render('user/signup',{errors: ['Sorry this username is taken']});
@@ -181,20 +185,19 @@ module.exports = function(app) {
       if (errors.length === 0) {
         newData.name 		= settings.name;
         newData.email 	= settings.email;
+        notificationSettings.email = notificationSettings.email || { value: ""};
         newData.notificationSettings = notificationSettings;
+        if (settings.newpw==="" && settings.newpwr==="") {
+          Account.update({_id: o.id}, newData, {upsert: false}, function (err, r) {
 
-          if (settings.newpw==="" && settings.newpwr==="") {
+          });
+        } else {
+          Account.saltAndHash(settings.newpw, function (hash) {
+            newData.pass = hash;
             Account.update({_id: o.id}, newData, {upsert: false}, function (err, r) {
-
             });
-          } else {
-            Account.saltAndHash(settings.newpw, function (hash) {
-              newData.pass = hash;
-              Account.update({_id: o.id}, newData, {upsert: false}, function (err, r) {
-              });
-            });
-          }
-
+          });
+        }
       }
       res.redirect('/dashboard/settings');
     });

@@ -49,53 +49,48 @@
  *       to:       'bar@blurdybloop.com, baz@blurdybloop.com'
  *     # The email plugin also uses the main `url` param for hyperlinks in the sent emails
  */
-var fs         = require('fs');
+var fs = require('fs');
 var nodemailer = require('nodemailer');
-var moment     = require('moment');
+var moment = require('moment');
 var CheckEvent = require('../../models/checkEvent');
 var Account = require('../../models/user/accountManager');
-var ejs        = require('ejs');
+var ejs = require('ejs');
 
-exports.initWebApp = function(options) {
+exports.initWebApp = function (options) {
   var config = options.config.email;
   var mailer = nodemailer.createTransport(config.method, config.transport);
   var templateDir = __dirname + '/views/';
-  CheckEvent.on('afterInsert', function(checkEvent) {
+  CheckEvent.on('afterInsert', function (checkEvent) {
     if (!config.event[checkEvent.message]) return;
-    checkEvent.findCheck(function(err, check) {
+    checkEvent.findCheck(function (err, check) {
       //console.log(check);
-      Account.findOne({_id: check.owner}, function (e, r) {
-        if(!r.notificationSettings){
-          return;
-        }
-        if(r.notificationSettings.email == ""){
-          return;
-        }
-        if (err) return console.error(err);
-        var filename = templateDir + checkEvent.message + '.ejs';
-        var renderOptions = {
-          check: check,
-          checkEvent: checkEvent,
-          url: options.config.url,
-          moment: moment,
-          filename: filename
-        };
-        var lines = ejs.render(fs.readFileSync(filename, 'utf8'), renderOptions).split('\n');
-        var mailOptions = {
-          from: config.message.from,
-          to: r.notificationSettings.email,
-          subject: lines.shift(),
-          cc:      checkEvent.tags.filter(function(value){
-                      return value.indexOf('mailto:') != -1;
-                   }).map(function(value){
-                      return value.split('mailto:')[1];
-                   }).join(', '),
-          text: lines.join('\n')
-        };
-        mailer.sendMail(mailOptions, function (err2, response) {
-          if (err2) return console.error('Email plugin error: %s', err2);
-          //console.log('Notified event by email: Check ' + check.name + ' ' + checkEvent.message);
-        });
+      if (check.notifiers.email) {
+        //return;
+      }
+      if (err) return console.error(err);
+      var filename = templateDir + checkEvent.message + '.ejs';
+      var renderOptions = {
+        check: check,
+        checkEvent: checkEvent,
+        url: options.config.url,
+        moment: moment,
+        filename: filename
+      };
+      var lines = ejs.render(fs.readFileSync(filename, 'utf8'), renderOptions).split('\n');
+      var mailOptions = {
+        from: config.message.from,
+        to: check.notifiers.email.value,
+        subject: lines.shift(),
+        cc:      checkEvent.tags.filter(function(value){
+                    return value.indexOf('mailto:') != -1;
+                 }).map(function(value){
+                    return value.split('mailto:')[1];
+                 }).join(', '),
+        text: lines.join('\n')
+      };
+      mailer.sendMail(mailOptions, function (err2, response) {
+        if (err2) return console.error('Email plugin error: %s', err2);
+        console.log('Notified event by email: Check ' + check.name + ' ' + checkEvent.message);
       });
     });
   });
