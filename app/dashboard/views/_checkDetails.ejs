@@ -69,17 +69,17 @@
           <div class="checkbox">
             <label class="checkbox">
               <input type="checkbox" name="check[notifiers][email][value]" value="<%= user.email %>"
-                      <% if(user.email === user.notificationSettings.email.value || check.notifiers.email) { %>
+                      <% if(check.notifiers.email) {
+                      %>
                      checked="checked"
                       <% } %>
-
                       >E-mail
             </label>
           </div>
           <div class="checkbox">
             <label class="checkbox">
               <input type="checkbox" id="pushBullet"
-                      <% if(user.notificationSettings.pushbullet.apikey !== "" || check.notifiers.pushbullet) { %>
+                      <% if(check.notifiers.pushbullet) { %>
                      checked="checked"
                       <% } %> > Pushbullet<br/>
             </label>

@@ -59,7 +59,7 @@ module.exports = function(app) {
     });
   });
 
-  app.post('/pings', function(req, res) {
+  app.post('/pings', isUser, function(req, res) {
     Check.findById(req.body.checkId, function(err1, check) {
       if (err1) {
         return res.send(err1.message, 500);

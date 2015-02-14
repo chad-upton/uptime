@@ -19,7 +19,7 @@
             <div role="tabpanel " class="tab-pane in fade active" id="home">
               <div class="col-xs-12 col-sm-12 col-md-12 nopadding">
                 <h2>Account settings</h2>
-                <div class="col-md-3 nopadding">
+                <div class="col-xs-6 col-sm-4 col-md-2 nopadding">
                   <label>Name<input type="text" value="<%= user.name %>" name="settings[name]" class="form-control"></label>
                   <label>E-mail <input type="text" value="<%= user.email %>" name="settings[email]" class="form-control"></label>
                   <label>Current password <input type="password" name="settings[oldpw]" class="form-control"></label>
@@ -73,29 +73,35 @@
               </div>
             </div>
             <div role="tabpanel" class="tab-pane fade" id="api">
-              <h2>Your api access tokens</h2>
-              <ul class="apiKeys">
-                <%  user.apiKeys.forEach(function(el, index) {
-                    var apiKey = user.apiKeys[index];
-                %>
-                  <li>
-                    <% if(apiKey.canDelete){ %>
-                      <div class="pull-right"><i class="fa fa-trash-o"></i> </div>
-                    <% } %>
-                    <div>Name: <%= apiKey.name %></div>
-                    <div>Description: <%= apiKey.description %></div>
-                    <div>Created: <%= moment(apiKey.created).format('LL HH:mm') %></div>
-                    <div>Last used: <%
-                      if(apiKey.lastAccessed ===0){ %>
-                            Never
-                      <% } else {%>
-                        <%= moment(apiKey.lastAccessed).format('LL HH:mm') %>
-                      <% }  %>
-                      <div>API Key: <input type="text" value="<%= apiKey.apiKey %>" class="apikey"></div>
-                    </div>
-                  </li>
-                <% }); %>
-              </ul>
+              <div class="col-md-6">
+                <h3>Add api key</h3>
+                    <label>Name<input type="text" placeholder="Enter a name" id="apiKeyName" class="form-control"></label>
+                    <input id='apiC' type="button" value="Create api key">
+              </div>
+              <div class="col-md-6 pull-left">
+                <h3>Your api access tokens</h3>
+                <ul class="apiKeys">
+                  <%  user.apiKeys.forEach(function(el, index) {
+                      var apiKey = user.apiKeys[index];
+                  %>
+                    <li>
+                      <% if(index !== 0){ %>
+                        <div class="pull-right"><i key="<%= apiKey.apiKey %>" class="fa fa-trash-o"></i> </div>
+                      <% } %>
+                      <div>Name: <%= apiKey.name %></div>
+                      <div>Created: <%= moment(apiKey.created).format('LL HH:mm') %></div>
+                      <div>Last used: <%
+                        if(apiKey.lastAccessed ===0){ %>
+                              Never
+                        <% } else {%>
+                          <%= moment.duration(new Date() - apiKey.lastAccessed).humanize() %> ago
+                        <% }  %>
+                        <div>API Key: <input type="text" value="<%= apiKey.apiKey %>" class="apikey"></div>
+                      </div>
+                    </li>
+                  <% }); %>
+                </ul>
+              </div>
             </div> <div role="tabpanel" class="tab-pane fade" id="sessions">
               <h2>Your active sessions</h2>
               <ul class="sessions">
@@ -166,5 +172,39 @@
         }
       });
     })
+
+    $('.apiKeys .fa-trash-o').click(function(){
+      var key = $(this).attr('key');
+      var _ele = $(this);
+      $.ajax({
+        url: '<%= route %>/settings/apikey/'+key,
+        type: 'DELETE',
+        success: function(result) {
+          _ele.parent().parent().slideUp();
+        }
+      });
+    })
+
+
+
+    $('#apiC').click(function(){
+      if($('#apiKeyName').val()==''){
+        return;
+      }
+      $.post('<%= route%>/settings/apikey',{name: $('#apiKeyName').val() },function(r){
+        var apiKey = r.newKey;
+        var tmpl =  [' <li>',
+                    '<div class="pull-right"><i class="fa fa-trash-o"></i> </div>',
+                    '<div>Name:'+  apiKey.name +'</div>',
+                    '<div>Created: '+ moment(apiKey.created).format('LL HH:mm') +'</div>',
+                    '<div>Last used: Never',
+                    '<div>API Key: <input type="text" value="'+ apiKey.apiKey +'" class="apikey"></div>',
+                    '</div>',
+                    '</li>'];
+        $('.apiKeys').append(tmpl.join(''));
+        $('#apiKeyName').val('')
+      });
+    })
+
   });
 </script>

@@ -45,7 +45,7 @@ module.exports = function(app) {
   app.get('/checks/needingPoll', function(req, res, next) {
     Check
     .needingPoll()
-    .select({qos: 0})
+    .select({qos: 0}).populate('owner','apiKeys')
     .exec(function(err, checks) {
       if (err) return next(err);
       res.json(checks);

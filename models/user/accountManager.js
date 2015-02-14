@@ -27,12 +27,28 @@ Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
      * Check for an api key:
      *
      */
-    this.db.model('Account').find({apiKeys:{ $elemMatch: {apiKey: req.query.apikey } } },function(e,r){
-
-      if(r === null){
+    var _self = this;
+    this.db.model('Account').find({apiKeys:{ $elemMatch: {apiKey: req.query.apikey } } },function(e,user){
+      if(user === null){
         errorCallback(req);
       } else {
-        loggedInCallback(r);
+        var usr = user[0].toObject();
+        var id = user[0]._id;
+        delete usr._id;
+        delete usr['_id'];
+        for(var i=0;i < usr.apiKeys.length; i++){
+          var key =usr.apiKeys[i].apiKey;
+          if(key == req.query.apikey){
+            usr.apiKeys[i].lastAccessed = new Date();
+            _self.db.collection('accounts').update({_id: id},usr,{},function(e,r){
+              loggedInCallback(user[0]);
+            });
+            /*user[0].save(function(e,r){
+
+            });*/
+            break;
+          }
+        };
       }
     });
   } else {
@@ -72,6 +88,45 @@ Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
       return;
     }
   }
+};
+
+Account.statics.createApiKey =  function(name,user,cb) {
+  //console.log('Creating a session for',user._id,ip,useragent);
+  var apiKey = {
+    name: name,
+    apiKey: crypto.randomBytes(32).toString('hex'),
+    created: new Date(),
+    lastAccessed: 0
+  };
+  var usr = user.toObject();
+  var id = user._id;
+
+  delete usr._id;
+  delete usr['_id'];
+
+  usr.apiKeys.push(apiKey)
+  this.db.collection('accounts').update({_id: id},usr,{},function(e,r){
+      console.log(e,r)
+  });
+};
+
+Account.statics.deleteApiKey =  function(apikeyHash,user,cb) {
+  var usr = user.toObject();
+  var id = user._id;
+  delete usr._id;
+  delete usr['_id'];
+  for(var i=0; i < usr.apiKeys.length; i++){
+    if(usr.apiKeys[i].apiKey == apikeyHash){
+      if(i==0){
+        return;
+      }
+      var ret = usr.apiKeys.splice(i,1);
+      break;
+    }
+  }
+  this.db.collection('accounts').update({_id: id},usr,{},function(e,r){
+      cb(e,r);
+  });
 };
 /* login validation methods */
 /*

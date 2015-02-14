@@ -97,7 +97,6 @@ module.exports = function(app) {
       name: 'General api key',
       description: 'For quick use',
       apiKey: crypto.randomBytes(32).toString('hex'),
-      canDelete: false,
       created: new Date(),
       lastAccessed: 0
     }];
@@ -132,6 +131,9 @@ module.exports = function(app) {
     }
     if(newUser.name===''){
       errors.push('Fill in a name');
+    }
+    if(newUser.pass !== req.param('passr')){
+      errors.push('Passwords do not match');
     }
     Account.findOne({user: newUser.user}, function (e, o) {
       if (o) {
@@ -222,5 +224,24 @@ module.exports = function(app) {
       }
     });
     res.json(result)
+  });
+
+  app.post('/settings/apikey', isAuthed, function (req, res) {
+    var name = req.param('name');
+    Account.createApiKey(name, req.user, function(user,newKey){
+      console.log('result')
+      res.json({
+        user: user,
+        newKey: newKey
+      });
+    });
+  });
+
+  app.delete('/settings/apikey/:hash', isAuthed, function (req, res) {
+    var name = req.param('name');
+
+    Account.deleteApiKey(req.params.hash, req.user, function(e,r){
+      res.json({e: e,r:r});
+    });
   });
 }

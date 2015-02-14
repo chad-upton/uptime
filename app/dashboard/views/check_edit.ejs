@@ -12,7 +12,7 @@
 <% if (info.length) { %>
 <div class="alert alert-success"><%= info %></div>
 <% } %>
-<%- partial('_check_details', { check: check, pollerCollection: pollerCollection, pollerDetails: pollerDetails, route: route }) %>
+<%- partial('_check_details', { check: check, pollerCollection: pollerCollection, pollerDetails: pollerDetails, route: route, isNewCheck: true }) %>
 <div>
 </div>
 <script>
@@ -27,7 +27,7 @@ jQuery(document).ready(function($) {
   });
   
   // manage pause
-  $('a[name="pause"]').click(function(e) {
+  $('span[name="pause"]').click(function(e) {
     var button = $(this).children();
     $.getJSON('/api/checks/<%= check._id %>/pause', function() {
       if(button.hasClass('fa-pause')) {
