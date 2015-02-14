@@ -31,7 +31,7 @@ module.exports = function(app) {
         req.session.sessionHash = {};
         delete req.session.sessionHash;
         app.locals.sessionHash = false;
-        app.locals.user = false;
+        app.locals.user = {};
         req.session = null;
         res.clearCookie('sessionHash');
         res.redirect('/dashboard/login');

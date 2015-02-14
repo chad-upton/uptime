@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <title>Uptime</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
     <link rel="stylesheet" href="<%= route %>/vendor/bootstrap/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="<%= route %>/vendor/fontawesome/css/font-awesome.min.css">
     <link rel="stylesheet" href="<%= route %>/stylesheets/style.css">
@@ -59,7 +59,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Uptime</a>
+          <a class="navbar-brand" href="#">Uptime <sup>on steroids</sup></a>
           <% if(typeof user ==="object"){ %>
             <ul class="nav navbar-nav pull-right visible-xs check_summary">
               <li class="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
@@ -115,20 +115,20 @@
     <footer class="footer">
       <div class="container">
         <p class="pull-right"><a href="#">Back to top</a></p>
-        <p><a href="https://github.com/brantje/uptime">Uptime <%= version %></a> heavly modded by brantje, powered by <a href="http://nodejs.org/">Node.js</a>, <a href="http://www.mongodb.org/">MongoDB</a>, and <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>.</p>
-        <p>Code licensed under the <a href="https://raw.github.com/fzaninotto/uptime/master/LICENSE">MIT License</a>. Check the <a href="https://github.com/fzaninotto/uptime">Uptime GitHub repository</a> regularly for updates.
+        <p><a href="https://github.com/brantje/uptime">Uptime <sup>on steroids</sup> <%= version %></a> heavly modded by brantje, powered by <a href="http://nodejs.org/">Node.js</a>, <a href="http://www.mongodb.org/">MongoDB</a>, and <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>.</p>
+        <p>Code licensed under the <a href="https://raw.github.com/brantje/uptime/master/LICENSE">MIT License</a>. Check the <a href="https://github.com/brantje/uptime">Uptime GitHub repository</a> regularly for updates.
       </div>
     </footer>
     <% if(typeof user ==="object"){ %>
       <script>
-      var user = <%- JSON.stringify(user) %>;
+      var user = <%- JSON.stringify(user) %>
       var nbNewEvents = 0;
       var loadedAt = new Date();
       $(document).ready(function() {
         $( document ).ajaxError(function(event,xhr,settings,error) {
           console.log('Ajax error:')
           console.log(event,xhr,settings,error);
-          if(xhr.status === 403){
+          if(xhr.status === 403 && window.location.pathname !== '/dashboard/login'){
             window.location.href = "<%= route %>/signout";
           }
         });

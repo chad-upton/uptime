@@ -17,14 +17,14 @@
 
           <div class="form-group">
               <label class="control-label">Type</label>
-              <select name="check[type]" value="<% check.type || '' %>" class="form-control">
+              <select id="type" name="check[type]" value="<% check.type || '' %>" class="form-control">
                   <option value="">auto</option>
                   <% pollerCollection.getTypes().forEach(function(poller) { %>
                   <option value="<%= poller %>" <% if (poller === check.type) { %> selected="true" <% } %>><%= poller %></option>
                   <% }) %>
               </select>
           </div>
-          <div class="col-xs-12 col-sm-6 col-md-6">
+          <div class="col-xs-12 col-sm-8 col-md-6">
             <div class="form-group">
                 <label class="control-label">Polling interval</label>
                 <div class="input-group col-sm-4">
@@ -155,7 +155,11 @@ $(document).ready(function() {
   $('#check_form input[name*="url"]').blur(function() {
     var field = $(this);
     if (field.val() && field.val().indexOf('://') == -1) {
-      field.val('http://' + field.val());
+      if($('[name="check[type]"]').val()===''){
+        field.val('http://' + field.val());
+      } else {
+        field.val($('[name="check[type]"]').val()+'://'+field.val())
+      }
     }
   });
 

@@ -89,14 +89,14 @@ var statProvider = {
   'year':  { model: 'TagMonthlyStat' }
 };
 
-Tag.methods.getStatsForPeriod = function(period, begin, end, callback) {
+Tag.methods.getStatsForPeriod = function(period, begin, end,user, callback) {
   var periodPrefs = statProvider[period];
   if(!statProvider[period]){
     callback(null, {});
     return;
   }
   var stats = [];
-  var query = { name: this.name, timestamp: { $gte: begin, $lte: end } };
+  var query = { name: this.name, timestamp: { $gte: begin, $lte: end },owner: user };
   var stream = this.db.model(periodPrefs['model']).find(query).sort({ timestamp: -1 }).stream();
   stream.on('error', function(err) {
     callback(err);
@@ -137,7 +137,7 @@ Tag.methods.getSingleStatsForPeriod = function(period, date, callback) {
   var model = singleStatsProvider[period];
   var begin = moment(date).clone().startOf(period).toDate();
   var end   = moment(date).clone().startOf(period).toDate();
-  var query = { name: this.name, timestamp: { $gte: begin, $lte: end } };
+  var query = { name: this.name, timestamp: { $gte: begin, $lte: end }, owner: this.owner };
   this.db.model(model).findOne(query, function(err, stat) {
     if (err || !stat) return callback(err);
     return callback(null, {

@@ -81,7 +81,7 @@ module.exports = function(app) {
   });
 
   app.get('/tags/:name/stats/:type', isUser, loadTag, function(req, res, next) {
-    req.tag.getStatsForPeriod(req.params.type, req.query.begin, req.query.end, function(err, stats) {
+    req.tag.getStatsForPeriod(req.params.type, req.query.begin, req.query.end, req.user._id, function(err, stats) {
       if(err) return next(err);
       res.json(stats);
     });
@@ -90,7 +90,8 @@ module.exports = function(app) {
   app.get('/tags/:name/events',isUser, loadTag,  function(req, res) {
     var query = {
       tags: req.tag.name,
-      timestamp: { $gte: req.query.begin || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
+      timestamp: { $gte: req.query.begin || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+      owner: req.user._id
     };
     if (req.query.end) {
       query.timestamp.$lte = req.query.end;
