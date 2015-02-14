@@ -129,7 +129,7 @@
           console.log('Ajax error:')
           console.log(event,xhr,settings,error);
           if(xhr.status === 403 && window.location.pathname !== '/dashboard/login'){
-            window.location.href = "<%= route %>/signout";
+            //window.location.href = "<%= route %>/signout";
           }
         });
         var changeFavicon = function(red) {

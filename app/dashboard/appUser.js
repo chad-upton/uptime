@@ -32,7 +32,7 @@ module.exports = function(app) {
         delete req.session.sessionHash;
         app.locals.sessionHash = false;
         app.locals.user = {};
-        req.session = null;
+        //req.session = null;
         res.clearCookie('sessionHash');
         res.redirect('/dashboard/login');
       });
