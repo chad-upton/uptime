@@ -45,7 +45,9 @@ exports.initWebApp = function () {
       if (err) {
         return console.error(err);
       }
-
+      if(!check.notifiers){
+        return;
+      }
       if (!check.notifiers.pushbullet) {
         return
       }

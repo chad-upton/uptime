@@ -64,8 +64,11 @@ exports.initWebApp = function (options) {
     if (!config.event[checkEvent.message]) return;
     checkEvent.findCheck(function (err, check) {
       //console.log(check);
-      if (check.notifiers.email) {
-        //return;
+      if (!check.notifiers) {
+        return;
+      }
+      if (!check.notifiers.email) {
+        return;
       }
       if (err) return console.error(err);
       var filename = templateDir + checkEvent.message + '.ejs';

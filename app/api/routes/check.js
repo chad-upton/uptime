@@ -29,7 +29,7 @@ module.exports = function(app) {
 
 
   app.get('/checks',isUser, function(req, res, next) {
-    var query = {owner: req.user._id};
+    var query = {owner: req.user._id };
     if (req.query.tag) {
       query.tags = req.query.tag;
     }
@@ -57,7 +57,7 @@ module.exports = function(app) {
   // check route middleware
   var loadCheck = function(req, res, next) {
     Check
-    .find({ _id: req.params.id, owner: req.user._id })
+    .find({ _id: req.params.id })
     .select({qos: 0})
     .findOne(function(err, check) {
       if (err) return next(err);
@@ -95,7 +95,7 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/checks/:id/stat/:period/:timestamp',isUser, loadCheck, function(req, res, next) {
+  app.get('/checks/:id/stat/:period/:timestamp', isUser, loadCheck, function(req, res, next) {
     req.check.getSingleStatForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
       if (err) return next(err);
       res.json(stat);

@@ -340,7 +340,37 @@ Check.methods.populateFromDirtyCheck = function(dirtyCheck, pollerCollection) {
   if (typeof(this.url) == 'undefined') {
     throw new Error('URL must be defined');
   }
+  /*if(this.tags){
+    var index=0;
+    var self = this;
+    var handleTag = function(i){
+      var tag = self.tags[i];
+      if(tag == "null"){
+        return;
+      }
+      var nwTag = {
 
+      };
+      nwTag.name = tag;
+      nwTag.owner = dirtyCheck.owner._id;
+      Tag.tagExistFromUser(nwTag,function(e,r){
+        if(!r){
+          Tag.createTagForUser(nwTag,function(){
+            if(index < self.tags.length){
+              index += 1;
+              handleTag(index)
+            }
+          });
+        } else {
+          if(index < self.tags.length){
+            index += 1;
+            handleTag(index)
+          }
+        }
+      });
+    };
+    handleTag(index)
+  }*/
   if (dirtyCheck.type) {
     if (!pollerCollection.getForType(dirtyCheck.type).validateTarget(this.url)) {
       throw new Error('URL ' + this.url + ' and poller type ' + dirtyCheck.type + ' mismatch');
@@ -363,8 +393,8 @@ Check.statics.getAllTags = function(callback) {
   });
 };
 
-Check.statics.findForTag = function(tag, callback) {
-  return this.find().where('tags').equals(tag).exec(callback);
+Check.statics.findForTag = function(owner,tag, callback) {
+  return this.find({owner: owner}).where('tags').equals(tag).exec(callback);
 };
 
 Check.statics.convertTags = function(tags) {

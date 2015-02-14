@@ -14,10 +14,10 @@ var debugErrorHandler = function() {
 
 // middleware
 app.configure(function(){
-  app.use(function (req, res, next) {
+ /* app.use(function (req, res, next) {
     res.removeHeader("x-powered-by");
     next();
-  });
+  });*/
   app.use(app.router);
 });
 

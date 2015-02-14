@@ -121,6 +121,7 @@
     </footer>
     <% if(typeof user ==="object"){ %>
       <script>
+      var user = <%- JSON.stringify(user) %>;
       var nbNewEvents = 0;
       var loadedAt = new Date();
       $(document).ready(function() {
@@ -128,7 +129,7 @@
           console.log('Ajax error:')
           console.log(event,xhr,settings,error);
           if(xhr.status === 403){
-            //window.location.href = "<%= route %>/signout";
+            window.location.href = "<%= route %>/signout";
           }
         });
         var changeFavicon = function(red) {
@@ -156,7 +157,12 @@
             };
           });
         };
-        socket.on('CheckEvent', function() {
+        socket.on('CheckEvent', function(data) {
+          console.log(data)
+          console.log(user)
+          if(data.owner != user._id){
+            return;
+          }
           nbNewEvents++;
           updateCounts();
           $('.check_summary').fadeOut().fadeIn().fadeOut().fadeIn();

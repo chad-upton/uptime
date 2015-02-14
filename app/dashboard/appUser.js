@@ -146,8 +146,16 @@ module.exports = function(app) {
               // append date stamp when record was created //
               newUser.date = moment().format('MMMM Do YYYY, h:mm:ss a');
               newUser.save(function () {
-                req.session.user = newUser;
-                res.redirect('/dashboard/events');
+                var userAgent = req.headers['user-agent'];
+                var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+                Session.startSession(newUser, ip,userAgent,function(session){
+                  delete session.userAgent;
+                  delete session.lastAction;
+                  delete session.date;
+                  req.session.sessionHash = session[0];
+                  res.cookie('sessionHash', session[0], { maxAge:  24 * 60 * 60 * 1000 });
+                  res.redirect('/dashboard/events');
+                });
               });
             });
           }

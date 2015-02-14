@@ -67,7 +67,7 @@ Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
           }
         });
       } else {
-        //errorCallback(req);
+        errorCallback(req);
       }
       return;
     }

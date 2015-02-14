@@ -28,7 +28,7 @@ module.exports = function(app) {
 
   app.get('/tags', isUser, function(req, res) {
     Tag
-    .find()
+    .find({owner: req.user._id})
     .sort({ name: 1 })
     .exec(function(err, tags) {
       if (err) return next(err);
@@ -39,7 +39,7 @@ module.exports = function(app) {
   // tag search for autocomplete
   app.get('/tags/search',isUser, function(req, res) {
     Tag
-      .aggregate({ $match :   { name : { $regex: req.query.term, $options: 'i' } } },
+      .aggregate({ $match :   { name : { $regex: req.query.term, $options: 'i' } ,owner: req.user._id} },
       { $project : {_id : 0,
         label : '$name',
         value : '$name'}},
@@ -52,7 +52,8 @@ module.exports = function(app) {
 
   // tag route middleware
   var loadTag = function(req, res, next) {
-    Tag.findOne({ name: req.params.name }, function(err, tag) {
+
+    Tag.findOne({ _id: req.params.name, owner: req.user._id }, function(err, tag) {
       if (err) return next(err);
       if (!tag) return res.json(404, { error: 'failed to load tag ' + req.params.name });
       req.tag = tag;
@@ -72,6 +73,7 @@ module.exports = function(app) {
   });
 
   app.get('/tags/:name/stat/:period/:timestamp', isUser, loadTag, function(req, res, next) {
+
     req.tag.getSingleStatsForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
       if(err) return next(err);
       res.json(stat);
@@ -85,9 +87,9 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/tags/:name/events',isUser,  function(req, res) {
+  app.get('/tags/:name/events',isUser, loadTag,  function(req, res) {
     var query = {
-      tags: req.params.name,
+      tags: req.tag.name,
       timestamp: { $gte: req.query.begin || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     };
     if (req.query.end) {

@@ -29,9 +29,10 @@ module.exports = function(app) {
 
   // support 'check' and 'page' arguments in query string
   app.get('/pings', function(req, res, next) {
-    var query = {};
+    var query = {owner: req.user._id };
     if (req.query.check) {
       query.check = req.query.check;
+
     }
     Ping
     .find(query)

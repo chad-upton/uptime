@@ -52,6 +52,7 @@ $(document).ready(function() {
       }
       var lines = [];
       var nbEvents = 0;
+      console.log(events)
       $.each(events, function(key, eventGroup) {
         lines.push('<div class="panel panel-default"><div class="panel-heading">' + moment(key).format('dddd, MMMM Do') + '</div><div class="panel-body"><ul class="unstyled">');
         $.each(eventGroup, function(key, event) {
@@ -65,6 +66,9 @@ $(document).ready(function() {
         lines.push('<p class="alert alert-info">List limited to first 100 events - dig down to see all events</p>')
       }
       $('#checkEvents').html(lines.join(''));
+      if(nbEvents > 0){
+        $('#checkEvents').show();
+      }
       adjustHash();
     });
   }

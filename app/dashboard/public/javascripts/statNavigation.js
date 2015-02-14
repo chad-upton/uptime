@@ -10,8 +10,13 @@ StatNavigation.prototype.init = function() {
       statPane.find('.availability').text(stat.availability.replace('.000', ''));
       statPane.find('.responsiveness').text(stat.responsiveness.replace('.000', ''));
       statPane.find('.avgRespTime').text(stat.responseTime);
-      if (stat.downtime) {
-        statPane.find('.downtime').text(moment.duration(stat.downtime, 'seconds').humanize());
+
+      if (stat.downtime || window.location.pathname.indexOf('tags') >= 0) {
+        if(stat.downtime === 0){
+          statPane.find('.downtime').text();
+        } else {
+          statPane.find('.downtime').text(moment.duration(stat.downtime, 'seconds').humanize());
+        }
         statPane.find('.downtime').parentsUntil('li').show();
         $('#events').show();
       } else {

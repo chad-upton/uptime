@@ -98,13 +98,16 @@ app.get('/checks',isAuthed, function(req, res, next) {
 });
 
 app.get('/checks/new',isAuthed, function(req, res) {
-  res.render('check_new', { check: new Check(), pollerCollection: app.get('pollerCollection'), info: req.flash('info') });
+  var check = new Check();
+  check.notifiers = {};
+  res.render('check_new', { check: check, pollerCollection: app.get('pollerCollection'), info: req.flash('info') });
 });
 
 app.post('/checks',isAuthed, function(req, res, next) {
   var check = new Check();
   try {
     var dirtyCheck = req.body.check;
+    dirtyCheck.owner = req.user;
     check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'));
     app.emit('populateFromDirtyCheck', check, dirtyCheck, check.type);
   } catch (err) {
@@ -133,6 +136,7 @@ app.get('/checks/:id/edit',isAuthed, function(req, res, next) {
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
     var pollerDetails = [];
     app.emit('checkEdit', check.type, check, pollerDetails);
+    check.notifiers = check.notifiers || {};
     res.render('check_edit', { check: check, pollerCollection: app.get('pollerCollection'), pollerDetails: pollerDetails.join(''), info: req.flash('info'), req: req });
   });
 });
@@ -154,16 +158,17 @@ app.put('/checks/:id',isAuthed, function(req, res, next) {
     if (err) return next(err);
     try {
       var dirtyCheck = req.body.check;
+      dirtyCheck.owner = req.user;
       check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'))
       app.emit('populateFromDirtyCheck', check, dirtyCheck, check.type);
     } catch (populationError) {
       return next(populationError);
     }
     /*if(check.owner != req.user._id){
-      console.log('Illegal save detected');
-      req.flash('info', 'Changes not saved');
-      res.redirect(app.route + '/checks/' + req.params.id);
-    }*/
+     console.log('Illegal save detected');
+     req.flash('info', 'Changes not saved');
+     res.redirect(app.route + '/checks/' + req.params.id);
+     }*/
     check.notifiers = req.param('check').notifiers;
     check.save(function(err2) {
       if (err2) return next(err2);
@@ -172,6 +177,7 @@ app.put('/checks/:id',isAuthed, function(req, res, next) {
     });
   });
 });
+
 
 app.delete('/checks/:id',isAuthed, function(req, res, next) {
   Check.findOne({ _id: req.params.id, owner: req.user._id }, function(err, check) {
@@ -187,14 +193,14 @@ app.delete('/checks/:id',isAuthed, function(req, res, next) {
 
 app.get('/tags',isAuthed, function(req, res, next) {
   //{owner: req.user._id}
-  Tag.find().sort({ name: 1 }).exec(function(err, tags) {
+  Tag.find({owner: req.user._id}).sort({ name: 1 }).exec(function(err, tags) {
     if (err) return next(err);
     res.render('tags', { info: req.flash('info'), tags: tags });
   });
 });
 
 app.get('/tags/:name',isAuthed, function(req, res, next) {
-  Tag.findOne({ name: req.params.name }, function(err, tag) {
+  Tag.findOne({ name: req.params.name, owner: req.user._id }, function(err, tag) {
     if (err) {
       return next(err);
     }

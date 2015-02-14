@@ -24,11 +24,10 @@ var Tag = new Schema({
   responsiveness : Number,
   responseTime   : Number,
   downtime       : Number,
-  outages        : Array,
+  outages        : Array
 });
-Tag.index({ name: 1 }, { unique: true });
 Tag.plugin(require('mongoose-lifecycle'));
-
+Tag.index({ owner: 1 });
 Tag.pre('remove', function(next) {
   this.removeStats(function() {
     next();
@@ -44,14 +43,37 @@ Tag.methods.removeStats = function(callback) {
   ], callback);
 };
 
-Tag.methods.getChecks = function(callback) {
+Tag.methods.getChecks = function(tag,callback) {
   var Check   = require('./check');
-  Check.find({ tags: this.name }, callback);
+  /*console.log('getChecks');
+  console.log('Complete tag object',tag)
+  console.log('So the tag of the tag is',tag.owner)
+  console.log('Loop over object')*/
+  var ownr;
+  for (var key in tag) {
+    var obj = tag[key];
+    for (var prop in obj) {
+      // important check that this is objects own property
+      // not from prototype prop inherited
+      if(obj.hasOwnProperty(prop)){
+        if(prop==='owner') {
+          /*console.log('Found owner property on tag obj')
+          console.log(prop + " = " + obj[prop]);*/
+          ownr = obj[prop];
+          break;
+        }
+      }
+    }
+  }
+  /*console.log('Final result: ',ownr); */
+  Check.find({ tags: this.name, owner: ownr }, callback);
 };
 
-Tag.methods.getFirstTested = function(callback) {
+Tag.methods.getFirstTested = function(owner,callback) {
   var firstTested = Infinity;
-  this.getChecks(function(err, checks) {
+  this.getChecks(owner,function(err, checks) {
+    /*console.log('Found checks for tag');
+    console.log(checks);*/
     checks.forEach(function(check) {
       if (!check.firstTested) return;
       firstTested = Math.min(firstTested, check.firstTested);
@@ -61,6 +83,7 @@ Tag.methods.getFirstTested = function(callback) {
 };
 
 var statProvider = {
+  'hour':   { model: 'TagHourlyStat', duration: 60 * 60 * 1000 },
   'day':   { model: 'TagHourlyStat', duration: 60 * 60 * 1000 },
   'month': { model: 'TagDailyStat', duration: 24 * 60 * 60 * 1000 },
   'year':  { model: 'TagMonthlyStat' }
@@ -68,6 +91,10 @@ var statProvider = {
 
 Tag.methods.getStatsForPeriod = function(period, begin, end, callback) {
   var periodPrefs = statProvider[period];
+  if(!statProvider[period]){
+    callback(null, {});
+    return;
+  }
   var stats = [];
   var query = { name: this.name, timestamp: { $gte: begin, $lte: end } };
   var stream = this.db.model(periodPrefs['model']).find(query).sort({ timestamp: -1 }).stream();
@@ -87,7 +114,18 @@ Tag.methods.getStatsForPeriod = function(period, begin, end, callback) {
     callback(null, stats);
   });
 };
+Tag.statics.tagExistFromUser = function(tag, callback) {
+  this.db.model('Tag').findOne({owner: tag.owner, name: tag.name }, callback);
+};
 
+Tag.statics.createTagForUser = function(tag,callback) {
+  if(tag.name == null || tag.name == "null"){
+    return;
+  }
+  this.db.collection('tags').insert(tag, function (e, r) {
+    callback();
+  });
+};
 var singleStatsProvider = {
   'hour':  'TagHourlyStat',
   'day':   'TagDailyStat',
@@ -129,13 +167,14 @@ Tag.methods.getChecksForPeriod = function(period, date, callback) {
   var begin = moment(date).clone().startOf(period).toDate();
   var end   = moment(date).clone().endOf(period).toDate();
   var self = this;
-  this.db.model('Check').find({ tags: this.name }).select('_id').exec(function(err, res) {
+
+  this.db.model('Check').find({ tags: this.name, owner: this.owner }).select('_id').exec(function(err, res) {
     if (err) return callback(err);
     var ids = [];
     res.forEach(function(doc) {
       ids.push(doc._id);
     });
-    var query = { check: { $in: ids }, timestamp: { $gte: begin, $lte: end } };
+    var query = { check: { $in: ids }, timestamp: { $gte: begin, $lte: end }, owner: self.owner };
     var stream = self.db.model(periodPrefs['model']).find(query).populate('check').stream();
     stream
     .on('error', callback)
@@ -167,7 +206,7 @@ Tag.statics.ensureTagsHaveFirstTestedDate = function(callback) {
   this.find({ firstTested: { $exists: false }}, function(err, tags) {
     if (err || !tags) return callback(err);
     async.forEach(tags, function(tag, next) {
-      tag.getFirstTested(function(err2, firstTested) {
+      tag.getFirstTested(tag,function(err2, firstTested) {
         if (err2 || firstTested == Infinity) return callback(err2);
         tag.firstTested = firstTested;
         tag.save(next);
