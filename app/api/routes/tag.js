@@ -53,7 +53,7 @@ module.exports = function(app) {
   // tag route middleware
   var loadTag = function(req, res, next) {
 
-    Tag.findOne({ _id: req.params.name, owner: req.user._id }, function(err, tag) {
+    Tag.findOne({ name: req.params.name }, function(err, tag) {
       if (err) return next(err);
       if (!tag) return res.json(404, { error: 'failed to load tag ' + req.params.name });
       req.tag = tag;
@@ -74,14 +74,14 @@ module.exports = function(app) {
 
   app.get('/tags/:name/stat/:period/:timestamp', isUser, loadTag, function(req, res, next) {
 
-    req.tag.getSingleStatsForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
+    req.tag.getSingleStatsForPeriod(req.user,req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
       if(err) return next(err);
       res.json(stat);
     });
   });
 
   app.get('/tags/:name/stats/:type', isUser, loadTag, function(req, res, next) {
-    req.tag.getStatsForPeriod(req.params.type, req.query.begin, req.query.end, req.user._id, function(err, stats) {
+    req.tag.getStatsForPeriod(req.user, req.params.type, req.query.begin, req.query.end,  function(err, stats) {
       if(err) return next(err);
       res.json(stats);
     });
