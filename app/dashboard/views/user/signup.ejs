@@ -1,9 +1,10 @@
 <form class="form-signup"  method="post">
-  <% if(errors.length > 0){ %>
+  <% if(errors){ %>
   <div class="alert alert-danger" role="alert">
     <% for(var i=0; i < errors.length; i++) { %>
-      <%= errors[i] %></div>
+      <div><%= errors[i] %></div>
     <% }%>
+  </div>
   <% } %>
   <h2 class="form-signin-heading">Signup</h2>
   <label for="name-tf" class="sr-only">Name</label>

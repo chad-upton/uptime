@@ -80,6 +80,7 @@ var isUser = function(req,res,next) {
   require('./routes/check')(app);
   require('./routes/tag')(app);
   require('./routes/ping')(app);
+  require('./routes/user')(app);
 
 // route list
   app.get('/', function (req, res) {

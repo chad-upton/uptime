@@ -20,7 +20,8 @@ var Check = new Schema({
   interval    : { type: Number, default: 60000 }, // interval between two pings
   maxTime     : { type: Number, default: 1500 },  // time under which a ping is considered responsive
   alertTreshold : { type: Number, default: 1 },   // nb of errors from which to trigger a new CheckEvent
-  errorCount  : { type: Number, default: 0 },     // count number of errors
+  errorCount  : { type: Number, default: 0 },     // count number of errors,
+  timeout: { type: Number, default: 5000 },
   tags        : [String],
   lastChanged : Date,
   firstTested : Date,
@@ -33,8 +34,8 @@ var Check = new Schema({
   pollerParams : Schema.Types.Mixed,
   statusHubId : Number,
   owner: { type: Schema.ObjectId, ref: 'Account' },
-  notifiers: Object
-
+  notifiers: Object,
+  allowInvalidSSL: Boolean
 });
 Check.plugin(require('mongoose-lifecycle'));
 
@@ -326,6 +327,8 @@ Check.methods.populateFromDirtyCheck = function(dirtyCheck, pollerCollection) {
   this.isPaused = dirtyCheck.isPaused || this.isPaused;
   this.alertTreshold = dirtyCheck.alertTreshold || this.alertTreshold;
   this.interval = dirtyCheck.interval * 1000 || this.interval;
+  this.timeout = dirtyCheck.timeout * 1000 || this.timeout;
+  this.allowInvalidSSL = dirtyCheck.allowInvalidSSL || false;
 
   if (typeof(dirtyCheck.name) !== 'undefined' && dirtyCheck.name.length) {
       this.name = dirtyCheck.name;

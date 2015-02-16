@@ -13,7 +13,6 @@ DateNavigation.prototype.init = function(type, check) {
   // change date on click
   $('#dateNavigation').on('click', 'button', function(event) {
     var data = $(this).data();
-    console.log(data)
     interval.update(data.type, parseInt(data.date));
   });
   

@@ -82,7 +82,7 @@ exports.initWebApp = function (options) {
       var lines = ejs.render(fs.readFileSync(filename, 'utf8'), renderOptions).split('\n');
       var mailOptions = {
         from: config.message.from,
-        to: check.notifiers.email.value,
+        bcc: check.notifiers.email.value,
         subject: lines.shift(),
         cc:      checkEvent.tags.filter(function(value){
                     return value.indexOf('mailto:') != -1;

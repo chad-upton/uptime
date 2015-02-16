@@ -219,7 +219,6 @@ Tag.statics.removeOrphanTags = function(callback) {
   var Check = require('./check');
   this.find(function(err1, tags1) {
     if (err1) return callback(err1);
-    console.log(tags1)
     Check.getAllTags(function(err2, tags2) {
       if (err2) return callback(err2);
       async.forEach(tags1, function(tag, next) {

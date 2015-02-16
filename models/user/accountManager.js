@@ -54,7 +54,7 @@ Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
   } else {
     if(req.session.sessionHash) {
       var searchFor = req.session.sessionHash;
-      delete searchFor.user;
+      //delete searchFor.user;
       delete searchFor.ip;
       Session.getSessionFromUser(searchFor,function (storedSession) {
         if(storedSession !== null && storedSession.user){
@@ -68,7 +68,7 @@ Account.statics.isUserAuthed =  function(req,loggedInCallback,errorCallback){
     } else {
       if (req.cookies.sessionHash) {
         var searchFor = req.cookies.sessionHash;
-        delete searchFor.user;
+        //delete searchFor.user;
         delete searchFor.ip;
         if(searchFor instanceof Array){
           searchFor = searchFor[0];
@@ -106,7 +106,7 @@ Account.statics.createApiKey =  function(name,user,cb) {
 
   usr.apiKeys.push(apiKey)
   this.db.collection('accounts').update({_id: id},usr,{},function(e,r){
-      console.log(e,r)
+
   });
 };
 
@@ -126,6 +126,120 @@ Account.statics.deleteApiKey =  function(apikeyHash,user,cb) {
   }
   this.db.collection('accounts').update({_id: id},usr,{},function(e,r){
       cb(e,r);
+  });
+};
+
+Account.statics.createUser = function(req,callback){
+  var newUser = {};
+  var errors = [];
+  var apiKey = [{
+    name: 'General api key',
+    description: 'For quick use',
+    apiKey: crypto.randomBytes(32).toString('hex'),
+    created: new Date(),
+    lastAccessed: 0
+  }];
+  newUser.name = req.param('name');
+  newUser.email = req.param('email');
+  newUser.pass = req.param('pass');
+  newUser.apiKeys = apiKey;
+  newUser.user = req.param('user');
+  newUser.notificationSettings = {
+    email: {
+      value: "",
+      isDefault: false
+    },
+    pushbullet: {
+      apikey: "",
+      isDefault: false
+    },
+    statushub:{
+      subdomains: "",
+      apikey: "",
+      isDefault: false
+    }
+  };
+  /***/
+
+  if(!newUser.name){
+    errors.push('Fill in a username');
+  }
+  if(!newUser.pass){
+    errors.push('Fill in a password');
+  }
+  if(!newUser.email){
+    errors.push('Fill in a email address');
+  }
+  if(!newUser.name){
+    errors.push('Fill in a name');
+  }
+  if(newUser.pass !== req.param('passr')){
+    errors.push('Passwords do not match');
+  }
+  var _self = this;
+  if(errors.length === 0) {
+    _self.db.model('Account').findOne({user: newUser.user}, function (e, o) {
+      if (o) {
+        callback({errors: ['Sorry this username is taken']});
+      } else {
+        _self.db.model('Account').findOne({email: newUser.email}, function (e, o) {
+          if (o) {
+            callback({errors: ['Sorry this email address is already in use.']});
+          } else {
+            Account.statics.saltAndHash(newUser.pass, function (hash) {
+              newUser.pass = hash;
+              // append date stamp when record was created //
+              newUser.date = moment().format('MMMM Do YYYY, h:mm:ss a');
+              _self.db.collection('accounts').insert(newUser, function (e,r) {
+                var userAgent = req.headers['user-agent'];
+                var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+                Session.startSession(newUser, ip, userAgent, function (session) {
+                  delete session[0].userAgent;
+                  delete session[0].lastAction;
+                  delete session[0].date;
+                  req.session.sessionHash = session[0];
+                  var returnObj = {
+                    session: session[0],
+                    user: newUser
+                  };
+                  callback(returnObj);
+                });
+              });
+            });
+          }
+        });
+      }
+    });
+  } else {
+    callback({errors: errors});
+  }
+};
+
+
+Account.statics.loginUser = function(req,callback){
+  var user = req.param('user');
+  var pass = req.param('pass');
+  var _self = this;
+  _self.db.model('Account').findOne({user:user}, function(e, o) {
+    if (o == null){
+     callback({ errors: ['User not found'] } );
+    }	else{
+      Account.statics.validatePassword(pass, o.pass, function(err, r) {
+        if (r){
+          var userAgent = req.headers['user-agent'];
+          var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+          Session.startSession(o, ip,userAgent,function(session){
+            delete session[0].userAgent;
+            delete session[0].lastAction;
+            delete session[0].date;
+            req.session.sessionHash = session[0];
+            callback({session: session[0 ]});
+          });
+        }	else{
+          callback({ errors: ['Invalid password'] } );
+        }
+      });
+    }
   });
 };
 /* login validation methods */

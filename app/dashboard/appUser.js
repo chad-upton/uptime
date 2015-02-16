@@ -31,7 +31,7 @@ module.exports = function(app) {
         req.session.sessionHash = {};
         delete req.session.sessionHash;
         app.locals.sessionHash = false;
-        app.locals.user = {};
+        app.locals.user = false;
         //req.session = null;
         res.clearCookie('sessionHash');
         res.redirect('/dashboard/login');
@@ -54,36 +54,18 @@ module.exports = function(app) {
   };
 
   app.post('/login', function (req, res) {
-    var user = req.param('user');
-    var pass = req.param('pass');
-    Account.findOne({user:user}, function(e, o) {
-      if (o == null){
-        res.render('user/login',{ errors: ['User not found'] } );
-      }	else{
-        Account.validatePassword(pass, o.pass, function(err, r) {
-          if (r){
-            var userAgent = req.headers['user-agent'];
-            var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-            Session.startSession(o, ip,userAgent,function(session){
-                delete session.userAgent;
-                delete session.lastAction;
-                delete session.date;
-                req.session.sessionHash = session[0];
-                res.cookie('sessionHash', session[0], { maxAge:  24 * 60 * 60 * 1000 });
-                if (req.param('remember-me') == 'on'){
-                  req.session.cookie.expires = false;
-                  res.cookie('sessionHash', session, { maxAge:  365 * 24 * 60 * 60 * 1000 });
-                }
-                res.redirect('/dashboard/events');
-            });
-           /* req.session.user = o;*/
-          }	else{
-
-            res.render('user/login',{ errors: ['Invalid password'] } );
-          }
-        });
+   Account.loginUser(req,function(result){
+      if(result.errors){
+        res.render('user/login',{ errors: result.errors } );
+      } else {
+        res.cookie('sessionHash', result.session, { maxAge:  24 * 60 * 60 * 1000 });
+        if (req.param('remember-me') == 'on'){
+          req.session.cookie.expires = false;
+          res.cookie('sessionHash', result.session, { maxAge:  365 * 24 * 60 * 60 * 1000 });
+        }
+        res.redirect('/dashboard/events')
       }
-    });
+   });
   });
 
   app.get('/signup', function (req, res) {
@@ -91,77 +73,12 @@ module.exports = function(app) {
   });
 
   app.post('/signup', function (req, res) {
-    var newUser = new Account();
-    var errors = [];
-    var apiKey = [{
-      name: 'General api key',
-      description: 'For quick use',
-      apiKey: crypto.randomBytes(32).toString('hex'),
-      created: new Date(),
-      lastAccessed: 0
-    }];
-    newUser.name = req.param('name');
-    newUser.email = req.param('email');
-    newUser.pass = req.param('pass');
-    newUser.apiKeys = apiKey;
-    newUser.user = req.param('user');
-    newUser.notificationSettings = {
-      email: {
-        value: "",
-        isDefault: false
-      },
-      pushbullet: {
-        apikey: "",
-        isDefault: false
-      },
-      statushub:{
-        subdomains: "",
-        apikey: "",
-        isDefault: false
-      }
-    };
-    if(newUser.name===''){
-      errors.push('Fill in a username');
-    }
-    if(newUser.pass===''){
-      errors.push('Fill in a password');
-    }
-    if(newUser.email===''){
-      errors.push('Fill in a email address');
-    }
-    if(newUser.name===''){
-      errors.push('Fill in a name');
-    }
-    if(newUser.pass !== req.param('passr')){
-      errors.push('Passwords do not match');
-    }
-    Account.findOne({user: newUser.user}, function (e, o) {
-      if (o) {
-        res.render('user/signup',{errors: ['Sorry this username is taken']});
+    Account.createUser(req,function(result){
+      if(result.errors){
+        res.render('user/signup',{errors: result.errors});
       } else {
-        Account.findOne({email: newUser.email}, function (e, o) {
-          if (o) {
-            res.render('user/signup',{errors: ['Sorry this email address is already in use.']});
-          } else {
-            Account.saltAndHash(newUser.pass, function (hash) {
-              newUser.pass = hash;
-              // append date stamp when record was created //
-              newUser.date = moment().format('MMMM Do YYYY, h:mm:ss a');
-              newUser.save(function () {
-                var userAgent = req.headers['user-agent'];
-                var ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-                Session.startSession(newUser, ip,userAgent,function(session){
-                  delete session.userAgent;
-                  delete session.lastAction;
-                  delete session.date;
-                  req.session.sessionHash = session[0];
-                  res.cookie('sessionHash', session[0], { maxAge:  24 * 60 * 60 * 1000 });
-                  res.redirect('/dashboard/events');
-                });
-              });
-            });
-          }
-        });
+        //res.cookie('sessionHash', result.session, { maxAge:  24 * 60 * 60 * 1000 });
+       // res.redirect('/dashboard/events');
       }
     });
   });
@@ -229,7 +146,6 @@ module.exports = function(app) {
   app.post('/settings/apikey', isAuthed, function (req, res) {
     var name = req.param('name');
     Account.createApiKey(name, req.user, function(user,newKey){
-      console.log('result')
       res.json({
         user: user,
         newKey: newKey

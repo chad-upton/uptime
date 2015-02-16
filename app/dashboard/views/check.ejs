@@ -78,6 +78,7 @@ var dateInterval = new DateInterval(
   '/api/checks/<%= check._id %>/',
   'hour'
 );
+var check = <%- JSON.stringify(check) %>;
 jQuery(document).ready(function($) {
   // highlight current section in main nav
   $('.navbar-inner li').eq(1).addClass('active');

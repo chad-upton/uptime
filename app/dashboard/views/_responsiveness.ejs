@@ -6,7 +6,10 @@ jQuery(document).ready(function($) {
     var responsivenessData = [];
     var minResponsiveness = Infinity;
     $.each(dateInterval.stats, function(index, stat) {
-      var responsiveness = stat.responsiveness || (stat.isResponsive ? 100 : 0);
+      var responsiveness = (check.maxTime / (stat.time)* 100);
+      //var responsiveness = stat.responsiveness || (stat.isResponsive ? 100 : 0);
+      responsiveness = (responsiveness >= 100) ? 100 : responsiveness;
+      responsiveness = (responsiveness <= 0) ? 0 : responsiveness;
       responsivenessData.push([new Date(stat.timestamp), responsiveness]);
       minResponsiveness = Math.min(minResponsiveness, responsiveness);
     });

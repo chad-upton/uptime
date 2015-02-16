@@ -51,6 +51,9 @@ exports.initWebApp = function () {
       if (!check.notifiers.pushbullet) {
         return
       }
+      if(!check.notifiers.pushbullet.apikey){
+        return;
+      }
       var pusher = new PushBullet(check.notifiers.pushbullet.apikey);
       var message;
       if (checkEvent.message === 'up') {

@@ -126,8 +126,8 @@
       var loadedAt = new Date();
       $(document).ready(function() {
         $( document ).ajaxError(function(event,xhr,settings,error) {
-          console.log('Ajax error:')
-          console.log(event,xhr,settings,error);
+          /*console.log('Ajax error:')
+          console.log(event,xhr,settings,error);*/
           if(xhr.status === 403 && window.location.pathname !== '/dashboard/login'){
             //window.location.href = "<%= route %>/signout";
           }
@@ -158,8 +158,6 @@
           });
         };
         socket.on('CheckEvent', function(data) {
-          console.log(data)
-          console.log(user)
           if(data.owner != user._id){
             return;
           }
