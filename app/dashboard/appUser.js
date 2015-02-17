@@ -51,7 +51,7 @@ module.exports = function(app) {
     });
   };
 
-  var hasCookie = function(req,res,next){
+  var redirectIfValidCookie = function(req,res,next){
     Account.isUserAuthed(req,function(user){
       req.user = user;
       app.locals.user = user;
@@ -62,7 +62,7 @@ module.exports = function(app) {
     });
   };
 
-  app.get('/login',hasCookie, function (req, res) {
+  app.get('/login',redirectIfValidCookie, function (req, res) {
     res.render('user/login',{errors: []});
   });
 
