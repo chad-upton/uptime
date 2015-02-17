@@ -1,6 +1,6 @@
 module.exports = function(cluster) {
   if(cluster) {
-    console.log('Hello from monitor worker ' + cluster.worker.process.pid);
+    console.log('Hello from monitor worker ' + cluster.worker.id);
   }
   var fs = require('fs');
   var config = require('config');

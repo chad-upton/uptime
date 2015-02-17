@@ -107,6 +107,7 @@ app.get('/checks/new',isAuthed, function(req, res) {
 
 app.post('/checks',isAuthed, function(req, res, next) {
   var check = new Check();
+
   try {
     var dirtyCheck = req.body.check;
     dirtyCheck.owner = req.user;

@@ -117,7 +117,10 @@ jQuery(document).ready(function($) {
   $(window).resize(autoWidthDateNavigation)
 
   // update stats for each ping if looking at the current hour
-  socket.emit('set check', '<%= check._id %>');
+  socket.on('connect',function(){
+    socket.emit('set check', '<%= check._id %>');
+    console.log('connected to socket');
+  })
   socket.on('ping', function(ping) {
     if(ping.check !='<%= check._id %>'){
       return;

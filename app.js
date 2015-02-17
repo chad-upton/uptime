@@ -24,10 +24,8 @@ module.exports = function(cluster,workerProcess) {
   var connect = require('connect');
   var spdy = require('spdy');
 // database
+  var serverUrl = url.parse(config.url);
 
-  var debug = function(log){
-    process.send({debug: log});
-  };
 
   var mongoose = require('./bootstrap');
 
@@ -64,12 +62,12 @@ module.exports = function(cluster,workerProcess) {
     app.disable('x-powered-by');
     app.use(function (req, res, next) {
       if(app.locals.cluster) {
-        res.setHeader('X-worker', 'Express worker' + app.locals.cluster.worker.id);
+        res.setHeader('x-cluster-node', 'node'+app.locals.cluster.worker.id+'.'+serverUrl.hostname);
       }
       next();
     });
-    app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
-    app.use(express.cookieSession({
+   //app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
+   /*app.use(express.cookieSession({
       key: 'uptime',
       secret: 'FZ5HEE5YHD3E566756234C45BY4DSFZ4',
       proxy: true,
@@ -174,14 +172,18 @@ module.exports = function(cluster,workerProcess) {
     sessionSockets.on('connection', function (err,socket,session) {
       socket.on('set check', function (check) {
         //socket.set('check', check);
+        if(!session){
+          return;
+        }
         session.curCheck = check;
         session.save();
       });
       Ping.on('afterInsert', function (ping) {
-        console.log(ping.check,session.curCheck);
+
         if(!session){
           return;
         }
+        console.log(ping.check,session.curCheck);
         if (ping.check == session.curCheck) {
           socket.emit('ping', ping);
         }
@@ -192,10 +194,6 @@ module.exports = function(cluster,workerProcess) {
 
     });
   } else {
-    /* FIXME: client not handshaken client should reconnect
-     * Falls back to long-polling
-     * Ping events are emitted to all client instead of 1
-     */
     var RedisStore = require('socket.io/lib/stores/redis');
     var redis = require('socket.io/node_modules/redis');
 
@@ -227,26 +225,44 @@ module.exports = function(cluster,workerProcess) {
 
 
     //sessionSockets.on('connection', function (err,socket,session) {
-    io.sockets.on('connection', function (socket,session) {
-      socket.on('set check', function (check) {
-        socket.set('check-'+socket.id , check);
-      });
-      process.on('message', function(event) {
-        if(event.event === 'ping'){
-          socket.get('check-'+socket.id,function(e,r){
-            //console.log('Current socket id:', r)
-            if(r){
+    io.sockets.on('connection', function (socket, session) {
+      var list = {}, rc = socket.handshake.headers.cookie;
+      cookieParser(socket.handshake, {}, function (parseErr) {
+        if (!socket.handshake.cookies) {
+          socket.disconnect();
+          return;
+        }
+        socket.set('user-' + socket.id, socket.handshake.cookies.sessionHash.user);
 
-              if(event.data.check === r) {
+        //console.log(JSON.parse(decodeURI(socket.handshake.headers.cookie)));
+        socket.on('set check', function (check) {
+          socket.set('check-' + socket.id, check);
+        });
+        process.on('message', function (event) {
+          if (!socket.id) {
+            return;
+          }
+          if (event.event === 'ping') {
+            socket.get('check-' + socket.id, function (e, r) {
+              //console.log('Current socket id:', r)
+              if (r) {
+                if (event.data.check === r) {
+                  socket.emit(event.event, event.data);
+                }
+              }
+            });
+          } else {
+            socket.get('user-' + socket.id, function (e, r) {
+              if (!r) {
+                return;
+              }
+              if (event.data.owner === r) {
                 socket.emit(event.event, event.data);
               }
-            }
-          });
-        } else {
-          socket.emit(event.event, event.data);
-        }
+            })
+          }
+        });
       });
-
     });
   }
 // old way to load plugins, kept for BC
@@ -270,7 +286,6 @@ module.exports = function(cluster,workerProcess) {
   module.exports = app;
 
   var monitorInstance;
-  var serverUrl = url.parse(config.url);
   var port;
   if (config.server && config.server.port) {
     console.error('Warning: The server port setting is deprecated, please use the url setting instead');
@@ -295,6 +310,43 @@ module.exports = function(cluster,workerProcess) {
     }
   });
 
+if(module.parent){
+  var domain = require('domain');
+  var d = domain.create();
+  d.on('error', function(er) {
+    console.error('error', er.stack);
+
+    // Note: we're in dangerous territory!
+    // By definition, something unexpected occurred,
+    // which we probably didn't want.
+    // Anything can happen now!  Be very careful!
+
+    try {
+      // make sure we close down within 30 seconds
+      var killtimer = setTimeout(function() {
+        process.exit(1);
+      }, 30000);
+      // But don't keep the process open just for that!
+      killtimer.unref();
+
+      // stop taking new requests.
+      server.close();
+
+      // Let the master know we're dead.  This will trigger a
+      // 'disconnect' in the cluster master, and then it will fork
+      // a new worker.
+      workerProcess.worker.disconnect();
+
+      // try to send an error to the request that triggered the problem
+      res.statusCode = 500;
+      res.setHeader('content-type', 'text/plain');
+      res.end('Oops, there was a problem!\n');
+    } catch (er2) {
+      // oh well, not much we can do at this point.
+      console.error('Error sending 500!', er2.stack);
+    }
+  });
+}
 
 // monitor
   if (!module.parent && !cluster) {

@@ -47,6 +47,17 @@ if (cluster.isMaster) {
   });
 
 } else {
-  var monitorInstance;
+  var monitorInstance = [];
   require("./app.js")(cluster,process);
+
+  if(config.autoStartMonitor){
+    var i = cluster.worker.id;
+    if(i === 0){
+      monitorInstance[i] = require('./monitor')(cluster);
+    } else {
+      setTimeout(function(){
+        monitorInstance[i] = require('./monitor')(cluster);
+      },(i*(1000+i)));
+    }
+  }
 }
