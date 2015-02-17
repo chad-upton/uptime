@@ -119,6 +119,9 @@ jQuery(document).ready(function($) {
   // update stats for each ping if looking at the current hour
   socket.emit('set check', '<%= check._id %>');
   socket.on('ping', function(ping) {
+    if(ping.check !='<%= check._id %>'){
+      return;
+    }
     var now = Date.now();
     if (dateInterval.type == 'hour' && now > dateInterval.begin.valueOf() && now < dateInterval.end.valueOf()) {
       dateInterval.refreshData();

@@ -38,7 +38,9 @@ app.configure(function(){
     next();
   });
   app.use(function (req, res, next) {
-    res.removeHeader("x-powered-by");
+    if(app.locals.cluster) {
+      res.setHeader('X-worker', 'Express worker' + app.locals.cluster.worker.id);
+    }
     next();
   });
   app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));

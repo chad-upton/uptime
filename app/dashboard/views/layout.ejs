@@ -168,6 +168,10 @@
             $('#new_events a').html(nbNewEvents + ' new event' + (nbNewEvents > 1 ? 's' : '') + ' since ' + moment(loadedAt).format('LLL'));
           }
         });
+        socket.on('disconnect',function(){
+          console.log('socket closed');
+            io.connect(location.protocol + '//' + location.hostname);
+        })
         updateCounts();
 
         var isActive = true;
