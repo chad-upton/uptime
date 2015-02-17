@@ -39,7 +39,7 @@ app.configure(function(){
   });
   app.use(function (req, res, next) {
     if(app.locals.cluster) {
-      res.setHeader('X-worker', 'Express worker' + app.locals.cluster.worker.id);
+      res.setHeader('x-cluster-node', 'node'+app.locals.cluster.worker.id+'.'+serverUrl.hostname);
     }
     next();
   });
