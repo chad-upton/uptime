@@ -77,8 +77,8 @@ module.exports = function(app) {
       if(result.errors){
         res.render('user/signup',{errors: result.errors});
       } else {
-        //res.cookie('sessionHash', result.session, { maxAge:  24 * 60 * 60 * 1000 });
-       // res.redirect('/dashboard/events');
+        res.cookie('sessionHash', result.session, { maxAge:  24 * 60 * 60 * 1000 });
+        res.redirect('/dashboard/events');
       }
     });
   });
