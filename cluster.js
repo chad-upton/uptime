@@ -2,9 +2,12 @@ var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var config     = require('config');
 var apiApp = require('./app/api/app');
+var analyzer = require('./lib/analyzer');
 var workers = [];
 if (cluster.isMaster) {
-
+  var a = analyzer.createAnalyzer(config.analyzer);
+  a.start();
+  
   var broadcast = function(event) {
     for (var i in workers) {
       var worker = workers[i];

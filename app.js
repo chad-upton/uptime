@@ -4,6 +4,10 @@
 module.exports = function(cluster,workerProcess) {
   if(cluster) {
     console.log('Hello from worker ' + cluster.worker.process.pid);
+  } else{
+    var analyzer = require('./lib/analyzer');
+    var a = analyzer.createAnalyzer(config.analyzer);
+    a.start();
   }
   var http = require('http');
   var https = require('https');
@@ -13,7 +17,7 @@ module.exports = function(cluster,workerProcess) {
 
   var fs = require('fs');
   var monitor = require('./lib/monitor');
-  var analyzer = require('./lib/analyzer');
+
   var CheckEvent = require('./models/checkEvent');
   var Account = require('./models/user/accountManager');
   var Ping = require('./models/ping');
@@ -29,8 +33,7 @@ module.exports = function(cluster,workerProcess) {
 
   var mongoose = require('./bootstrap');
 
-  var a = analyzer.createAnalyzer(config.analyzer);
-  a.start();
+
 
 // web front
 
