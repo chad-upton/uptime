@@ -2,6 +2,7 @@ var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
 var config     = require('config');
 var apiApp = require('./app/api/app');
+var mongoose = require('./bootstrap');
 var analyzer = require('./lib/analyzer');
 var workers = [];
 if (cluster.isMaster) {

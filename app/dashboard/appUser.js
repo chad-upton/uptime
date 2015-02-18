@@ -35,6 +35,7 @@ module.exports = function(app) {
         res.redirect('/dashboard/login');
       });
     } else {
+      res.clearCookie('sessionHash');
       res.redirect('/dashboard/login');
     }
   });

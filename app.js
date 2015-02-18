@@ -5,8 +5,10 @@ module.exports = function(cluster,workerProcess) {
   if(cluster) {
     console.log('Hello from worker ' + cluster.worker.process.pid);
   } else{
-
+    var a = analyzer.createAnalyzer(config.analyzer);
+    a.start();
   }
+  var mongoose = require('./bootstrap');
   var http = require('http');
   var https = require('https');
   var url = require('url');
@@ -28,10 +30,9 @@ module.exports = function(cluster,workerProcess) {
 // database
   var serverUrl = url.parse(config.url);
   var analyzer = require('./lib/analyzer');
-  var a = analyzer.createAnalyzer(config.analyzer);
-  a.start();
 
-  var mongoose = require('./bootstrap');
+
+
 
 
 
