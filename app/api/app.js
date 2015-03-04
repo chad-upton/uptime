@@ -53,6 +53,13 @@ Check.on('afterInsert', function() { upCount = undefined; });
 Check.on('afterRemove', function() { upCount = undefined; });
 CheckEvent.on('afterInsert', function() { upCount = undefined; });
 
+// cors
+app.all('/*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
+});
+
 app.get('/checks/count', function(req, res, next) {
   if (upCount) {
     res.json(upCount);
@@ -65,7 +72,6 @@ app.get('/checks/count', function(req, res, next) {
 });
 
 // Routes
-
 require('./routes/check')(app);
 require('./routes/tag')(app);
 require('./routes/ping')(app);
