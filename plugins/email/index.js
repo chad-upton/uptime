@@ -5,7 +5,7 @@
  *
  * Installation
  * ------------
- * This plugin is disabled by default. To enable it, add its entry 
+ * This plugin is disabled by default. To enable it, add its entry
  * to the `plugins` key of the configuration:
  *
  *   // in config/production.yaml
@@ -14,7 +14,7 @@
  *
  * Usage
  * -----
- * This plugin sends an email each time a check is started, goes down, or goes back up. 
+ * This plugin sends an email each time a check is started, goes down, or goes back up.
  * When the check goes down, the email contains the error details:
  *
  *   Object: [Down] Check "FooBar" just went down
@@ -36,7 +36,7 @@
  *     method:      SMTP  # possible methods are SMTP, SES, or Sendmail
  *     transport:         # see https://github.com/andris9/nodemailer for transport options
  *       service:   Gmail
- *       auth:            
+ *       auth:
  *         user:    foobar@gmail.com
  *         pass:    gursikso
  *     event:
@@ -44,24 +44,32 @@
  *       down:      true
  *       paused:    false
  *       restarted: false
- *     message:           
+ *     message:
  *       from:     'Fred Foo <foo@blurdybloop.com>'
  *       to:       'bar@blurdybloop.com, baz@blurdybloop.com'
  *     # The email plugin also uses the main `url` param for hyperlinks in the sent emails
  */
-var fs         = require('fs');
+var fs = require('fs');
 var nodemailer = require('nodemailer');
-var moment     = require('moment');
+var moment = require('moment');
 var CheckEvent = require('../../models/checkEvent');
-var ejs        = require('ejs');
+var Account = require('../../models/user/accountManager');
+var ejs = require('ejs');
 
-exports.initWebApp = function(options) {
+exports.initWebApp = function (options) {
   var config = options.config.email;
   var mailer = nodemailer.createTransport(config.method, config.transport);
   var templateDir = __dirname + '/views/';
-  CheckEvent.on('afterInsert', function(checkEvent) {
+  CheckEvent.on('afterInsert', function (checkEvent) {
     if (!config.event[checkEvent.message]) return;
-    checkEvent.findCheck(function(err, check) {
+    checkEvent.findCheck(function (err, check) {
+      //console.log(check);
+      if (!check.notifiers) {
+        return;
+      }
+      if (!check.notifiers.email) {
+        return;
+      }
       if (err) return console.error(err);
       var filename = templateDir + checkEvent.message + '.ejs';
       var renderOptions = {
@@ -73,8 +81,8 @@ exports.initWebApp = function(options) {
       };
       var lines = ejs.render(fs.readFileSync(filename, 'utf8'), renderOptions).split('\n');
       var mailOptions = {
-        from:    config.message.from,
-        to:      config.message.to,
+        from: config.message.from,
+        bcc: check.notifiers.email.value,
         subject: lines.shift(),
         cc:      checkEvent.tags.filter(function(value){
                     return value.indexOf('mailto:') != -1;
@@ -83,7 +91,7 @@ exports.initWebApp = function(options) {
                  }).join(', '),
         text: lines.join('\n')
       };
-      mailer.sendMail(mailOptions, function(err2, response) {
+      mailer.sendMail(mailOptions, function (err2, response) {
         if (err2) return console.error('Email plugin error: %s', err2);
         console.log('Notified event by email: Check ' + check.name + ' ' + checkEvent.message);
       });

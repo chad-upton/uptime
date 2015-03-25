@@ -8,7 +8,8 @@ var CheckEvent = new Schema({
   message     : String, // possible values are 'down', 'up', 'paused', 'restarted'
   details     : String,
   // for error events, more details need to be persisted
-  downtime    : Number
+  downtime    : Number,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
 CheckEvent.index({ check: 1, timestamp: -1 });
 CheckEvent.plugin(require('mongoose-lifecycle'));

@@ -3,6 +3,7 @@
  */
 
 var http       = require('http');
+var https      = require('https');
 var url        = require('url');
 var express    = require('express');
 var config     = require('config');
@@ -11,11 +12,14 @@ var fs         = require('fs');
 var monitor    = require('./lib/monitor');
 var analyzer   = require('./lib/analyzer');
 var CheckEvent = require('./models/checkEvent');
+var Account = require('./models/user/accountManager');
 var Ping       = require('./models/ping');
 var PollerCollection = require('./lib/pollers/pollerCollection');
 var apiApp     = require('./app/api/app');
 var dashboardApp = require('./app/dashboard/app');
-
+var cookieParser = express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4');
+var connect = require('connect');
+var spdy = require('spdy');
 // database
 
 var mongoose   = require('./bootstrap');
@@ -26,21 +30,36 @@ a.start();
 // web front
 
 var app = module.exports = express();
-var server = http.createServer(app);
+if (config.ssl && config.ssl.enabled === true) {
+  if (typeof(config.ssl.certificate) === 'undefined') {
+    throw new Error("Must specify certificate to enable SSL!");
+  }
+  if (typeof(config.ssl.key) === 'undefined') {
+    throw new Error("Must specify key file to enable SSL!");
+  }
+  var options = {
+    cert: fs.readFileSync(config.ssl.certificate),
+    key: fs.readFileSync(config.ssl.key)
+  };
+  var server = spdy.createServer(options, app);
+} else {
+  var server = http.createServer(app);
+}
 
 app.configure(function(){
-  app.use(app.router);
-  // the following middlewares are only necessary for the mounted 'dashboard' app, 
-  // but express needs it on the parent app (?) and it therefore pollutes the api
-  app.use(express.bodyParser());
-  app.use(express.methodOverride());
+  app.disable('x-powered-by');
   app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
   app.use(express.cookieSession({
     key:    'uptime',
     secret: 'FZ5HEE5YHD3E566756234C45BY4DSFZ4',
     proxy:  true,
-    cookie: { maxAge: 60 * 60 * 1000 }
+    cookie: { maxAge: 24*60 * 60 * 1000 }
   }));
+  app.use(app.router);
+  // the following middlewares are only necessary for the mounted 'dashboard' app,
+  // but express needs it on the parent app (?) and it therefore pollutes the api
+  app.use(express.bodyParser());
+  app.use(express.methodOverride());
   app.set('pollerCollection', new PollerCollection());
 });
 
@@ -73,6 +92,15 @@ app.configure('production', function() {
   app.use(express.errorHandler());
 });
 
+// CORS
+if (config.enableCORS) {
+    app.use(function(req, res, next) {
+        res.header('Access-Control-Allow-Origin', '*');
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+        next();
+    });
+}
+
 // Routes
 app.emit('beforeApiRoutes', app, apiApp);
 app.use('/api', apiApp);
@@ -80,7 +108,23 @@ app.use('/api', apiApp);
 app.emit('beforeDashboardRoutes', app, dashboardApp);
 app.use('/dashboard', dashboardApp);
 app.get('/', function(req, res) {
-  res.redirect('/dashboard/events');
+  if(req.cookies.user && req.cookies.pass){
+    Account.findOne({user: req.cookies.user, pass: req.cookies.pass},function(e,r){
+      if(r){
+        req.session.user = r;
+        res.redirect('/dashboard/events');
+      } else {
+        res.redirect('/dashboard/logout');
+      }
+    });
+  } else {
+    if (req.session.user == undefined) {
+      res.redirect('/dashboard/login');
+    } else {
+      res.redirect('/dashboard/events');
+    }
+  }
+
 });
 
 app.get('/favicon.ico', function(req, res) {
@@ -91,6 +135,9 @@ app.emit('afterLastRoute', app);
 
 // Sockets
 var io = socketIo.listen(server);
+var sessionStore = new connect.middleware.session.MemoryStore();
+var SessionSockets = require('session.socket.io')
+  , sessionSockets = new SessionSockets(io, sessionStore, cookieParser);
 
 io.configure('production', function() {
   io.enable('browser client etag');
@@ -100,14 +147,14 @@ io.configure('production', function() {
 io.configure('development', function() {
   if (!config.verbose) io.set('log level', 1);
 });
+/*
 
-CheckEvent.on('afterInsert', function(event) {
-  io.sockets.emit('CheckEvent', event.toJSON());
-});
-
-io.sockets.on('connection', function(socket) {
+ */
+sessionSockets.on('connection', function (err, socket, session) {
   socket.on('set check', function(check) {
     socket.set('check', check);
+    //session.check = check;
+    //session.save();
   });
   Ping.on('afterInsert', function(ping) {
     socket.get('check', function(err, check) {
@@ -115,6 +162,9 @@ io.sockets.on('connection', function(socket) {
         socket.emit('ping', ping);
       }
     });
+  });
+  CheckEvent.on('afterInsert', function(event) {
+    socket.emit('CheckEvent', event.toJSON());
   });
 });
 
@@ -149,13 +199,15 @@ if (!module.parent) {
   } else {
     port = serverUrl.port;
     if (port === null) {
-      port = 80;
+      port = config.ssl && config.ssl.enabled ? 443 : 80;
     }
   }
   var port = process.env.PORT || port;
   var host = process.env.HOST || serverUrl.hostname;
   server.listen(port, function(){
-    console.log("Express server listening on host %s, port %d in %s mode", host, port, app.settings.env);
+    var prefix = (config.ssl.enabled) ? 'https://' : 'http://';
+    host = prefix+host;
+    console.log("Express server listening on host %s:%d, in %s mode", host, port, app.settings.env);
   });
   server.on('error', function(e) {
     if (monitorInstance) {

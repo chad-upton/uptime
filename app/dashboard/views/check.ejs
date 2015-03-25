@@ -11,12 +11,12 @@ var ejs = require('ejs');
 ejs.open = '{{';
 ejs.close = '}}';
 </script>
-<div style="float: right;">
-  <span id="check_24h"></span>
-  <a href="<%= route %>/checks/<%= check._id %>/edit" class="btn btn-primary">Edit</a>
-</div>
-<h1>
-  Check "<%= check.name %>"
+<h1 class="page-header">
+  <div class="pull-right">
+    <small id="check_24h"></small>
+    <a href="<%= route %>/checks/<%= check._id %>/edit" class="btn btn-primary">Edit</a>
+  </div>
+  <i class="fa fa-check"></i> Check "<%= check.name %>"
   <a href="<%= check.url %>" target="_blank"><img src="<%= route %>/images/external-link-ltr-icon.png"></a>
 </h1>
 <% if (info.length) { %>
@@ -25,24 +25,24 @@ ejs.close = '}}';
 <div id="dateNavigationContainer">
   <div id="dateNavigation">
     <div class="row">
-      <div class="span2"></div>
-      <div class="span10">
+      <div class="col-sm-2"></div>
+      <div class="col-sm-10">
         <div class="title"></div>
-        <div class="timeline"></div>
+        <div class="timeline hidden-xs "></div>
       </div>
     </div>
     <div class="row">
-      <div class="span2">
+      <div class="col-sm-2">
         <ul class="btn-group zoom"></ul>
       </div>
-      <div class="span10">
+      <div class="col-sm-10">
         <div class="periods"></div>
       </div>
     </div>
   </div>
 </div>
 <div id="sectionList" class="row">
-  <div class="span2">
+  <div class="hidden-xs col-sm-2">
     <ul id="secondaryNav" class="nav nav-tabs nav-stacked">
       <li><a href="#availability" title="Percentage of uptime over the period">Availability<i class="icon-chevron-right"></i><br/><strong class="availability"></strong>%</a></li>
       <li><a href="#events">Downtime<i class="icon-chevron-right"></i><br/><strong class="downtime"></strong></a></li>
@@ -51,23 +51,23 @@ ejs.close = '}}';
       <li><a href="#data">Data<i class="icon-chevron-right"></i></a></li>
     </ul>
   </div>
-  <div class="span10">
-    <section id="availability">
+  <div class="col-sm-10">
+    <div class="panel panel-default" id="availability">
     <%- partial('_availability') %>
-    </section>
-    <section id="events">
-    <h2>Downtime</h2>
-    <%- partial('_events', { url: '/api/checks/' + check._id + '/events', route: route }) %>
-    </section>
-    <section id="responseTime">
+    </div>
+    <div class="panel panel-default" id="events">
+      <div class="panel-heading">Downtime</div>
+      <%- partial('_events', { url: '/api/checks/' + check._id + '/events', route: route }) %>
+    </div>
+    <div class="panel panel-default" id="responseTime">
     <%- partial('_responseTime') %>
-    </section>
-    <section id="responsiveness">
+    </div>
+    <div class="panel panel-default" id="responsiveness">
     <%- partial('_responsiveness') %>
-    </section>
-    <section id="data">
+    </div>
+    <div id="data">
     <%- partial('_data', { url: '/api/checks/' + check._id + '/stats/', route: route } ) %>
-    </section>
+    </div>
   </div>
 </div>
 <script>
@@ -78,6 +78,7 @@ var dateInterval = new DateInterval(
   '/api/checks/<%= check._id %>/',
   'hour'
 );
+var check = <%- JSON.stringify(check) %>;
 jQuery(document).ready(function($) {
   // highlight current section in main nav
   $('.navbar-inner li').eq(1).addClass('active');
@@ -106,7 +107,15 @@ jQuery(document).ready(function($) {
       });
     });
   }, 5000);
-  
+  window.autoWidthDateNavigation = function(){
+   /* var containerWidth = $(window).width()*0.8333333333;
+    var periodsWidth = ($(window).width() >= 762) ? containerWidth : '100%';
+    $('.periods .btn-group').width($('.col-sm-10').width()+60);
+    var ourWidth = ($('.col-sm-10').width()-180)/$('.periods .btn-group > button').not(':first').not(':last').length;
+    $('.periods .btn-group > button').not(':first').not(':last').width(ourWidth+'px');*/
+  };
+  $(window).resize(autoWidthDateNavigation)
+
   // update stats for each ping if looking at the current hour
   socket.emit('set check', '<%= check._id %>');
   socket.on('ping', function(ping) {
@@ -114,6 +123,7 @@ jQuery(document).ready(function($) {
     if (dateInterval.type == 'hour' && now > dateInterval.begin.valueOf() && now < dateInterval.end.valueOf()) {
       dateInterval.refreshData();
     }
+    autoWidthDateNavigation();
   });
   
   // update stats every 15 minutes if looking at the current moment

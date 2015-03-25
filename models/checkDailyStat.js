@@ -10,7 +10,8 @@ var CheckDailyStat = new Schema({
   responsiveness : Number,
   responseTime   : Number,
   downtime       : Number,
-  outages        : Array
+  outages        : Array,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
 CheckDailyStat.index({ check: 1, timestamp: -1 }, { unique: true });
 CheckDailyStat.plugin(require('mongoose-lifecycle'));

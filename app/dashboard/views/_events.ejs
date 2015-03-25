@@ -1,8 +1,8 @@
 <div id="checkEvents"></div>
 <script id="event_template" type="text/template">
 <li class="{{= highlightFrom && date.valueOf() > highlightFrom ? 'new' : ''}}">
-  <span class="label" title="{{= date }}">{{= date.format('LT') }}</span>
-  {{ var label = (event.message == 'paused' || event.message == 'restarted') ? 'info' : (event.message == 'up') ? 'success' : 'important' }}
+  <span class="label label-default" title="{{= date }}">{{= date.format('HH:mm') }}</span>
+  {{ var label = (event.message == 'paused' || event.message == 'restarted') ? 'info' : (event.message == 'up') ? 'success' : 'danger' }}
   <span class="label label-{{= label }}">{{= event.message }}</span>
   <a href="{{=  route + '/checks/' + event.check._id }}">{{= event.check.name }}</a>
   <a href="{{= event.check.url }}" target="_blank"><img src="{{= route }}/images/external-link-ltr-icon.png"></a>
@@ -52,19 +52,23 @@ $(document).ready(function() {
       }
       var lines = [];
       var nbEvents = 0;
+
       $.each(events, function(key, eventGroup) {
-        lines.push('<ul><li class="day"><h3>' + moment(key).format('dddd, MMMM Do') + '</h3><ul>');
+        lines.push('<div class="panel panel-default"><div class="panel-heading">' + moment(key).format('dddd, MMMM Do') + '</div><div class="panel-body"><ul class="unstyled">');
         $.each(eventGroup, function(key, event) {
           if (!event.message) return;
           lines.push(ejs.render(event_template, { event: event, date: moment(event.timestamp), highlightFrom: highlightFrom, route: '<%= route %>' }));
           nbEvents++;
         });
-        lines.push('</ul></li></ul>');
+        lines.push('</ul></div></div>');
       });
       if (nbEvents == 100) {
-        lines.push('<p>List limited to first 100 events - dig down to see all events</p>')
+        lines.push('<p class="alert alert-info">List limited to first 100 events - dig down to see all events</p>')
       }
       $('#checkEvents').html(lines.join(''));
+      if(nbEvents > 0){
+        $('#checkEvents').show();
+      }
       adjustHash();
     });
   }

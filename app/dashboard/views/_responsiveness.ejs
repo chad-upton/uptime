@@ -1,16 +1,20 @@
-<h2>Responsiveness</h2>
-<div id="responsivenessGraph" class="graph adjustedOnDateNavigation"></div>
+<div class="panel-heading">Responsiveness</div>
+<div id="responsivenessGraph" class="panel-body graph adjustedOnDateNavigation"></div>
 <script>
 jQuery(document).ready(function($) {
   var refreshResponsivenessGraph = function() {
     var responsivenessData = [];
     var minResponsiveness = Infinity;
     $.each(dateInterval.stats, function(index, stat) {
-      var responsiveness = stat.responsiveness || (stat.isResponsive ? 100 : 0);
+      var responsiveness = (check.maxTime / (stat.time)* 100);
+      //var responsiveness = stat.responsiveness || (stat.isResponsive ? 100 : 0);
+      responsiveness = (responsiveness >= 100) ? 100 : responsiveness;
+      responsiveness = (responsiveness <= 0) ? 0 : responsiveness;
       responsivenessData.push([new Date(stat.timestamp), responsiveness]);
       minResponsiveness = Math.min(minResponsiveness, responsiveness);
     });
     var container = $('#responsivenessGraph').get(0);
+    $('#responsivenessGraph').width($('.panel-heading').width()-40);
     Flotr.draw(container, [{ data: responsivenessData, color: '#9440ED', lines: { show: true, lineWidth: 4 }, points: { show: true } }], { 
       yaxis : {
         min : 0,
@@ -28,7 +32,7 @@ jQuery(document).ready(function($) {
       mouse : {
         track: true,
         trackFormatter: function(obj) {
-          return moment(obj.x).format('LLLL') + '<br/><strong>' + obj.y + '%</strong>';
+          return moment(obj.x).format('LL HH:mm') + '<br/><strong>' + obj.y + '%</strong>';
         },
         relative: true,
         sensibility: 4,
@@ -43,5 +47,6 @@ jQuery(document).ready(function($) {
     });
   }
   dateInterval.on('refresh-stats', refreshResponsivenessGraph);
+  $(window).resize(refreshResponsivenessGraph);
 });
 </script>
