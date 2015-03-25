@@ -23,10 +23,6 @@ var updateCheckState = function(check) {
     } else {
       // down
       status.label = 'danger';
-<<<<<<< HEAD:app/dashboard/public/javascripts/checkState.js
-      status.color = 'red';
-=======
->>>>>>> phanan/master:app/dashboard/src/js/checkState.js
       status.text = 'down';
       status.date = check.lastChanged;
     }
