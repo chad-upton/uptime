@@ -45,9 +45,15 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/pings/events', isUser,  function(req, res, next) {
+  app.get('/pings/events', isUser, function(req, res, next) {
+    var query = { timestamp: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } };
+
+    if (req.query.tag) {
+      query.tags = [req.query.tag];
+    }
+
     CheckEvent
-    .find({ timestamp: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, owner: req.user._id })
+    .find(query)
     .sort({ timestamp: -1 })
     .select({ tags: 0 })
     .limit(100)

@@ -90,20 +90,27 @@ app.get('/events', isAuthed, function(req, res) {
   res.render('events');
 });
 
-app.get('/checks',isAuthed, function(req, res, next) {
+app.get('/status/:tag', isAuthed, function(req, res, next) {
+  Check.find({ tags: req.params.tag} ).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
+    if (err) return next(err);
+    res.render('status', { layout: "status_layout.ejs", info: req.flash('info'), checks: checks, tag: req.params.tag });
+  });
+});
+
+app.get('/checks', isAuthed, function(req, res, next) {
   Check.find({ owner: req.user._id }).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
     if (err) return next(err);
     res.render('checks', { info: req.flash('info'), checks: checks });
   });
 });
 
-app.get('/checks/new',isAuthed, function(req, res) {
+app.get('/checks/new', isAuthed, function(req, res) {
   var check = new Check();
   check.notifiers = {};
   res.render('check_new', { check: check, pollerCollection: app.get('pollerCollection'), info: req.flash('info') });
 });
 
-app.post('/checks',isAuthed, function(req, res, next) {
+app.post('/checks', isAuthed, function(req, res, next) {
   var check = new Check();
   try {
     var dirtyCheck = req.body.check;
@@ -122,7 +129,7 @@ app.post('/checks',isAuthed, function(req, res, next) {
   });
 });
 
-app.get('/checks/:id',isAuthed, function(req, res, next) {
+app.get('/checks/:id', isAuthed, function(req, res, next) {
   Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
@@ -130,7 +137,7 @@ app.get('/checks/:id',isAuthed, function(req, res, next) {
   });
 });
 
-app.get('/checks/:id/edit',isAuthed, function(req, res, next) {
+app.get('/checks/:id/edit', isAuthed, function(req, res, next) {
   Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
@@ -141,7 +148,7 @@ app.get('/checks/:id/edit',isAuthed, function(req, res, next) {
   });
 });
 
-app.get('/pollerPartial/:type',isAuthed, function(req, res, next) {
+app.get('/pollerPartial/:type', isAuthed, function(req, res, next) {
   var poller;
   try {
     poller = app.get('pollerCollection').getForType(req.params.type);
@@ -153,7 +160,7 @@ app.get('/pollerPartial/:type',isAuthed, function(req, res, next) {
   res.send(pollerDetails.join(''));
 });
 
-app.put('/checks/:id',isAuthed, function(req, res, next) {
+app.put('/checks/:id', isAuthed, function(req, res, next) {
   Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     try {
@@ -179,7 +186,7 @@ app.put('/checks/:id',isAuthed, function(req, res, next) {
 });
 
 
-app.delete('/checks/:id',isAuthed, function(req, res, next) {
+app.delete('/checks/:id', isAuthed, function(req, res, next) {
   Check.findOne({ _id: req.params.id, owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return next(new Error('failed to load check ' + req.params.id));
@@ -191,7 +198,7 @@ app.delete('/checks/:id',isAuthed, function(req, res, next) {
   });
 });
 
-app.get('/tags',isAuthed, function(req, res, next) {
+app.get('/tags', isAuthed, function(req, res, next) {
   //{owner: req.user._id}
   Tag.find({owner: req.user._id}).sort({ name: 1 }).exec(function(err, tags) {
     if (err) return next(err);
@@ -199,7 +206,7 @@ app.get('/tags',isAuthed, function(req, res, next) {
   });
 });
 
-app.get('/tags/:name',isAuthed, function(req, res, next) {
+app.get('/tags/:name', isAuthed, function(req, res, next) {
   Tag.findOne({ name: req.params.name, owner: req.user._id }, function(err, tag) {
     if (err) {
       return next(err);

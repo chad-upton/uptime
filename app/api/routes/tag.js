@@ -6,6 +6,7 @@ var Check         = require('../../../models/check');
 var Tag           = require('../../../models/tag');
 var TagHourlyStat = require('../../../models/tagHourlyStat');
 var CheckEvent    = require('../../../models/checkEvent');
+var Check         = require('../../../models/check');
 var async         = require('async');
 var Account = require('../../../models/user/accountManager');
 
@@ -37,7 +38,7 @@ module.exports = function(app) {
   });
 
   // tag search for autocomplete
-  app.get('/tags/search',isUser, function(req, res) {
+  app.get('/tags/search', isUser, function(req, res) {
     Tag
       .aggregate({ $match :   { name : { $regex: req.query.term, $options: 'i' } ,owner: req.user._id} },
       { $project : {_id : 0,
@@ -60,12 +61,19 @@ module.exports = function(app) {
       next();
     });
   };
-  
-  app.get('/tags/:name',isUser , loadTag, function(req, res, next) {
+
+  app.get('/tags/:name', isUser, loadTag, function(req, res, next) {
     res.json(req.tag);
   });
 
-  app.get('/tags/:name/checks/:period/:timestamp', isUser,  loadTag, function(req, res, next) {
+  app.get('/tags/:name/checks', isUser, function(req, res, next) {
+    Check.find({ tags: req.params.name} ).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
+      if (err) return next(err);
+      res.json(checks);
+    });
+  });
+
+  app.get('/tags/:name/checks/:period/:timestamp', isUser, loadTag, function(req, res, next) {
     req.tag.getChecksForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, checks) {
       if (err) return next(err);
       res.json(checks);
@@ -87,7 +95,7 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/tags/:name/events',isUser, loadTag,  function(req, res) {
+  app.get('/tags/:name/events', isUser, loadTag,  function(req, res) {
     var query = {
       tags: req.tag.name,
       timestamp: { $gte: req.query.begin || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },

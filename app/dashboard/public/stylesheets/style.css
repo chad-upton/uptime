@@ -150,6 +150,7 @@ table .headerSortDown:hover:after {
 }
 table .header {
   cursor: pointer;
+  background-color: #f7f7f9;
 }
 table .header:after {
   content: "";

@@ -2,7 +2,7 @@
 <script src="<%= route %>/javascripts/uptimeBar.js"></script>
 <script src="<%= route %>/javascripts/ejs.min.js"></script>
 <h1 class="page-header">
-	<i class="fa fa-tasks"></i> Checks 
+	<i class="fa fa-tasks"></i> Checks
 	<div class="pull-right">
 		<small class="hidden-xs">last 24 hours&nbsp;&nbsp;</small>
 		<a class="btn btn-primary" href="<%= route %>/checks/new">Create check</a>
@@ -13,12 +13,13 @@
 <% } %>
 <table class="table" id="checks">
   <thead>
-	<tr>
-	  <th style="width:30%">Name</th>
-	  <th style="width:20%">Status</th>
-	  <th class="hidden-xs" style="width:35%" title="Outage periods in the last 24h">Uptime</th>
-	  <th style="width:15%" title="Average response time in the last 24h">Response Time</th>
-	</tr>
+    <tr>
+      <th style="width:25%">Name</th>
+      <th style="width:15%">Tags</th>
+      <th style="width:20%">Status</th>
+      <th class="hidden-xs" style="width:30%" title="Outage periods in the last 24h">Uptime</th>
+      <th style="width:10%" title="Average response time in the last 24h">Response Time</th>
+    </tr>
   </thead>
   <tbody></tbody>
 </table>
@@ -27,6 +28,9 @@
   <td data-sort="{{= check.name }}">
 	<a href="{{=  route + '/checks/' + check._id }}?type=hour&date={{= new Date().getTime() }}">{{= check.name }}</a>
 	<a href="{{= check.url }}" target="_blank"><img src="{{= route }}/images/external-link-ltr-icon.png"></a>
+  </td>
+  <td>
+    {{= check.tags.join(", ") }}
   </td>
   {{ if (check.lastTested) { }}
 	{{ if (check.isPaused) { }}
