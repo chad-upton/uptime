@@ -18,9 +18,7 @@ var Account = require('../../models/user/accountManager');
 var Session = require('../../models/user/sessionManager');
 
 module.exports = function(app) {
-  app.get('/login', function (req, res) {
-    res.render('user/login',{errors: []});
-  });
+
 
   app.get('/signout', function (req, res) {
     if(req.session.sessionHash) {
@@ -53,6 +51,21 @@ module.exports = function(app) {
     });
   };
 
+  var redirectIfValidCookie = function(req,res,next){
+    Account.isUserAuthed(req,function(user){
+      req.user = user;
+      app.locals.user = user;
+      res.redirect('/dashboard/events');
+    },function(){
+      app.locals.user = false;
+      next();
+    });
+  };
+
+  app.get('/login',redirectIfValidCookie, function (req, res) {
+    res.render('user/login',{errors: []});
+  });
+
   app.post('/login', function (req, res) {
    Account.loginUser(req,function(result){
       if(result.errors){
@@ -77,8 +90,8 @@ module.exports = function(app) {
       if(result.errors){
         res.render('user/signup',{errors: result.errors});
       } else {
-        //res.cookie('sessionHash', result.session, { maxAge:  24 * 60 * 60 * 1000 });
-       // res.redirect('/dashboard/events');
+        res.cookie('sessionHash', result.session, { maxAge:  24 * 60 * 60 * 1000 });
+        res.redirect('/dashboard/events');
       }
     });
   });
