@@ -33,12 +33,17 @@ Ping.statics.createForCheck = function(status, timestamp, time, check, monitorNa
   timestamp = (typeof timestamp !== 'NaN') ? new Date(timestamp) : new Date();
   var ping = new this();
   ping.timestamp = timestamp;
-  ping.isUp = status;
+
   if (status && check.maxTime) {
     ping.isResponsive = time < check.maxTime;
   } else {
     ping.isResponsive = false;
   }
+  if (status && !ping.isResponsive) {
+    status = false;
+    error = "unresponsive";
+  }
+  ping.isUp = status;
   ping.time = time;
   ping.check = check;
   ping.tags = check.tags;

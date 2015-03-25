@@ -81,7 +81,7 @@ exports.initMonitor = function(options) {
     if (!options) return;
     // add the custom options to the poller target
     for (var key in options) {
-      poller.target[key] = options[key];
+      poller.target.headers[key] = options[key];
     }
     return;
   });

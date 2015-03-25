@@ -330,6 +330,7 @@ Check.methods.populateFromDirtyCheck = function(dirtyCheck, pollerCollection) {
   this.interval = dirtyCheck.interval * 1000 || this.interval;
   this.timeout = dirtyCheck.timeout * 1000 || this.timeout;
   this.allowInvalidSSL = dirtyCheck.allowInvalidSSL || false;
+  this.pollerParams = dirtyCheck.pollerParams || this.pollerParams;
 
   if (typeof(dirtyCheck.name) !== 'undefined' && dirtyCheck.name.length) {
       this.name = dirtyCheck.name;

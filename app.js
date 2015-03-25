@@ -190,7 +190,7 @@ module.exports = app;
 
 var monitorInstance;
 
-if (!module.parent) {
+//if (!module.parent) {
   var serverUrl = url.parse(config.url);
   var port;
   if (config.server && config.server.port) {
@@ -202,12 +202,14 @@ if (!module.parent) {
       port = config.ssl && config.ssl.enabled ? 443 : 80;
     }
   }
-  var port = process.env.PORT || port;
+
+  port = process.env.PORT || port;
   var host = process.env.HOST || serverUrl.hostname;
+
   server.listen(port, function(){
     var prefix = (config.ssl.enabled) ? 'https://' : 'http://';
-    host = prefix+host;
-    console.log("Express server listening on host %s:%d, in %s mode", host, port, app.settings.env);
+    host = prefix + host;
+    console.log("Express server listening on %s:%d in %s mode", host, port, app.settings.env);
   });
   server.on('error', function(e) {
     if (monitorInstance) {
@@ -215,7 +217,7 @@ if (!module.parent) {
       process.exit(1);
     }
   });
-}
+//}
 
 // monitor
 if (config.autoStartMonitor) {
