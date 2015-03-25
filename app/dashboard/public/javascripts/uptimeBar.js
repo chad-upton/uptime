@@ -2,20 +2,20 @@ var uptimeBar = (function(){
   var outageBar = function(begin, end, origin, duration) {
     return '<div class="down" '
               + 'style="left:' + (begin - origin) / duration * 100 + '%;width:' + (end - begin) / duration * 100 + '%" ' 
-              + 'title="' + moment.duration(end-begin).humanize() + ' outage from '+ moment(begin).format('LLL') + ' to ' + moment(end).format('LLL') + '">'
+              + 'title="' + moment.duration(end-begin).humanize() + ' outage from '+ moment(begin).format('LL HH:MM') + ' till ' + moment(end).format('LL HH:mm') + '">'
          + '</div>';
   }
   var pauseBar = function(begin, end, origin, duration) {
     return '<div class="pause" '
               + 'style="left:' + (begin - origin) / duration * 100 + '%;width:' + (end - begin) / duration * 100 + '%" ' 
-              + 'title="' + moment.duration(end-begin).humanize() + ' pause from '+ moment(begin).format('LLL') + ' to ' + moment(end).format('LLL') + '">'
+              + 'title="' + moment.duration(end-begin).humanize() + ' pause from '+ moment(begin).format('LL LL HH:mm') + ' to ' + moment(end).format('LL HH:mm') + '">'
          + '</div>';
   }
   var availabilityBar = function(begin, end, availability, origin, duration) {
     if (availability == 1) return '';
     var intensity = 1 - Math.pow(availability, 10) * 0.8;
     return '<div class="down" style="opacity: ' + intensity + ';left:' + (begin - origin) / duration * 100 + '%;width:' + (end - begin) / duration * 100 + '%" ' 
-              + 'title="' + (availability * 100).toFixed(3) + '% availability from '+ moment(begin).format('LL') + ' to ' + moment(end).format('LL') + '">'
+              + 'title="' + (availability * 100).toFixed(3) + '% availability from '+ moment(begin).format('HH:MM') + ' to ' + moment(end).format('LL') + '">'
          + '</div>'
   }
 

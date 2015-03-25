@@ -1,131 +1,155 @@
+<% addedCss.push('jquery-ui.autocomplete.min.css') %>
 <% addedCss.push('jquery.tagsinput.css') %>
+
 <div class="tab-pane" id="admin">
-  <form id="check_form" method="post" class="form-horizontal" action="<%= route %>/checks<%= check.isNew ? '' : '/' + check._id %>">
-    <input type="hidden" name="_method" value="<%= (check.isNew) ? 'post' : 'put' %>" />
+    <form id="check_form" method="post" class="form-vertical" action="<%= route %>/checks<%= check.isNew ? '' : '/' + check._id %>">
+        <input type="hidden" name="_method" value="<%= (check.isNew) ? 'post' : 'put' %>" />
 
-    <div class="row">
+          <div class="form-group">
+              <label class="control-label">Name</label>
+              <input type="text" name="check[name]" value="<%= check.name || '' %>" class="form-control col-sm-6" placeholder="Type a name here"/>
+          </div>
 
-      <div class="span6">
-        <fieldset>
-          <div class="control-group">
-            <label class="control-label">Url</label>
-            <div class="controls controls-row">
-              <input type="text" required name="check[url]" value="<%= check.url || '' %>" class="span5"  placeholder="http://www.example.com"/>
-              <span class="help-inline" style="position:absolute"><a href="<%= check.url %>" target="_blank"><img src="<%= route %>/images/external-link-ltr-icon.png"></a></span>
+          <div class="form-group">
+              <label class="control-label">Url</label>
+              <input type="text" required name="check[url]" value="<%= check.url || '' %>" class="form-control col-sm-6"  placeholder="http://www.example.com"/>
+          </div>
+
+          <div class="form-group">
+              <label class="control-label">Type</label>
+              <select id="type" name="check[type]" value="<% check.type || '' %>" class="form-control">
+                  <option value="">auto</option>
+                  <% pollerCollection.getTypes().forEach(function(poller) { %>
+                  <option value="<%= poller %>" <% if (poller === check.type) { %> selected="true" <% } %>><%= poller %></option>
+                  <% }) %>
+              </select><br />
+              <label id="httpslabel" style="display: none;"><input name="check[allowInvalidSSL]" type="checkbox"
+                  <% if(check.allowInvalidSSL) { %> checked <% } %>     >Allow invalid SSL certificate</label>
+          </div>
+          <div class="col-xs-12 col-sm-6 col-md-6 nopadding">
+            <div class="form-group">
+                <label class="control-label">Polling interval</label>
+                <div class="input-group col-sm-4">
+                    <% if (check.lastTested) { %>
+                    <span class="input-group-addon" name="pause">
+                        <i class="fa fa-<%= check.isPaused ? 'play' : 'pause' %>"></i>
+                    </span>
+                    <% } %>
+                    <input type="text" name="check[interval]" value="<%= (check.interval / 1000).toFixed() %>" class="form-control" />
+                    <span class="input-group-addon">s</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label">Timeout</label>
+                <div class="input-group col-sm-4">
+                    <input type="text" name="check[timeout]" value="<%= ((check.timeout || 5000) / 1000).toFixed() %>" class="form-control" />
+                    <span class="input-group-addon">s</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Slow threshold</label>
+                <div class="input-group col-sm-4">
+                    <input type="text" name="check[maxTime]" value="<%= check.maxTime %>" class="form-control" />
+                    <span class="input-group-addon">ms</span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label">Alert threshold</label>
+                <div class="input-group col-sm-5 col-md-4">
+                    <input type="text" name="check[alertTreshold]" value="<%= check.alertTreshold %>" class="form-control" />
+                    <span class="input-group-addon">failed pings</span>
+                </div>
+            </div>
+
+            <span id="pollerDetails">
+                <%- pollerDetails %>
+            </span>
+
+            <div class="form-group">
+                <label class="control-label">Tags</label>
+                <textarea name="check[tags]" rows="2" class="form-control"><%= check.tags.join(', ') %></textarea>
+              <p class="muted">Separate tags with a comma</p>
+            </div>
+        </div>
+        <div class="col-xs-12 col-sm-6 col-md-6 nopadding">
+          <label class="control-label">Enabled notification services</label>
+          <div class="checkbox">
+            <label class="checkbox">
+              <input type="checkbox" name="check[notifiers][email][value]"
+                      <% if(check.notifiers.email) {
+                      %>
+                      <% if(check.notifiers.email.value !== '') {
+                      %>
+                     checked="checked"
+                      <% } %><% } %>
+                      >E-mail
+            </label>
+            <div id="extraEmails" style="display: none;">
+              <label>
+                Extra e-mail addresses to be notified
+              <br />
+              <input type="form-control" id="extraEmailInput"></label>
+              <p class="muted">Separate e-mails with a comma</p>
             </div>
           </div>
-        </fieldset>
-      </div>
-
-      <div class="span6">
-        <fieldset>
-          <div class="control-group">
-            <label class="control-label">Type</label>
-            <div class="controls controls-row">
-              <select name="check[type]" value="<% check.type || '' %>" class="span2">
-                <option value="">auto</option>
-                <% pollerCollection.getTypes().forEach(function(poller) { %>
-                <option value="<%= poller %>" <% if (poller === check.type) { %> selected="true" <% } %>><%= poller %></option>
-                <% }) %>
-              </select>
+          <div class="checkbox">
+            <label class="checkbox">
+              <input type="checkbox" id="pushBullet"
+                    <% if(check.notifiers.pushbullet) { %>
+                      <% if(check.notifiers.pushbullet.apikey !== '') { %>
+                     checked="checked"
+                      <% } %>
+                    <% } %> > Pushbullet<br/>
+            </label>
+            <div id="pushBulletSettings" style="display: none">
+                       <input class="form-control" style="max-width: 200px;" type="hidden" value=""
+                              name="check[notifiers][pushbullet][apikey]" placeholder="Enter your Pushbullet api key">
             </div>
+
           </div>
-        </fieldset>
-      </div>
-
-    </div>
-
-    <fieldset>
-      <div class="control-group">
-        <label class="control-label">Name</label>
-        <div class="controls">
-          <input type="text" name="check[name]" value="<%= check.name || '' %>" class="span8" placeholder="Type a name here"/>
-        </div>
-      </div>
-    </fieldset>
-
-    <div class="row">
-
-      <div class="span6">
-        <fieldset>
-          <div class="control-group">
-            <label class="control-label">Polling interval</label>
-            <div class="controls">
-              <div class="input-prepend input-append">
-                <% if (check.lastTested) { %>
-                <a class="btn" name="pause"><i class="icon-<%= check.isPaused ? 'play' : 'pause' %>"></i></a>
-                <% } %>
-                <input type="text" name="check[interval]" value="<%= (check.interval / 1000).toFixed() %>" class="span2" />
-                <span class="add-on">s</span>
-              </div>
+          <% if(user.notificationSettings.statushub.apikey !='' || check['statusHubId'] ) {%>
+          <div class="checkbox">
+            <label class="checkbox">
+              <input type="checkbox" id="statusHub"
+                      <% if(user.notificationSettings.statushub.apikey) { %>
+                     checked="checked"
+                      <% } %>
+                      > Statushub<br/>
+            </label>
+            <div class="form-group">
+              <label class="control-label">StatusHub Id</label>
+              <input type="text" name="check[statusHubId]" value="<%= check.statusHubId || '' %>" class="form-control col-sm-6" placeholder="id number here"/>
             </div>
+
           </div>
-        </fieldset>
-      </div>
-
-      <div class="span6">
-        <fieldset>
-          <div class="control-group">
-            <label class="control-label">Slow threshold</label>
-            <div class="controls">
-              <div class="input-append">
-                <input type="text" name="check[maxTime]" value="<%= check.maxTime %>" class="span1" />
-                <span class="add-on">ms</span>
-              </div>
-            </div>
-          </div>
-        </fieldset>
-      </div>
-
-    </div>
-
-
-    <fieldset>
-      <div class="control-group">
-        <label class="control-label">Alert threshold</label>
-        <div class="controls">
-          <div class="input-append">
-            <input type="text" name="check[alertTreshold]" value="<%= check.alertTreshold %>" class="span1" />
-            <span class="add-on">failed pings</span>
-          </div>
+          <% } %>
         </div>
-      </div>
-    </fieldset>
-
-    <span id="pollerDetails">
-    <%- pollerDetails %>
-    </span>
-
-    <fieldset>
-      <div class="control-group">
-        <label class="control-label">Tags</label>
-        <div class="controls">
-          <textarea name="check[tags]" rows="2"/><%= check.tags.join(', ') %></textarea>
+        <br style="clear: both;">
+        <% if (check.lastTested) { %>
+        <div class="form-group">
+            <label class="control-label">Last edited on</label>
+            <p class="static-control"><%= check.lastTested.getTime() %></p>
         </div>
-      </div>
-      <% if (check.lastTested) { %>
-      <div class="control-group">
-        <label class="control-label">Last edited on</label>
-        <div class="controls">
-          <span class="span4 uneditable-input"><%= check.lastTested.getTime() %></span>
-        </div>
-      </div>
-      <% } %>
-      <div class="form-actions">
-        <% if (check.isNew) { %>
-        <button type="submit" class="btn btn-primary">Save</button>
-        <button type="submit" name="saveandadd" value="true" class="btn btn-primary">Save and add</button>
-        <a class="btn" href="<%= route %>/checks">Cancel</a>
-        <% } else { %>
-        <button type="submit" class="btn btn-primary">Save changes</button>
-        <a class="btn" href="<%= route %>/checks/<%= check._id %>">Cancel</a>
-        <button type="submit" class="btn btn-danger pull-right" name="delete">Delete</button>
         <% } %>
-      </div>
-    </fieldset>
-  </form>
+
+        <div class="form-group">
+            <% if (check.isNew) { %>
+            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" name="saveandadd" value="true" class="btn btn-primary">Save and add</button>
+            <a class="btn" href="<%= route %>/checks">Cancel</a>
+            <% } else { %>
+            <button type="submit" class="btn btn-primary">Save changes</button>
+            <a class="btn" href="<%= route %>/checks/<%= check._id %>">Cancel</a>
+            <button type="submit" class="btn btn-danger pull-right" name="delete">Delete</button>
+            <% } %>
+        </div>
+
+    </form>
 </div>
 <script src="<%= route %>/javascripts/jquery.tagsinput.min.js"></script>
+
 <script>
 var intervalFieldSelector = 'form input[name="check\\[interval\\]"]';
 function updatePollingIntervalTooltip() {
@@ -151,9 +175,17 @@ $(document).ready(function() {
   $('#check_form input[name*="url"]').blur(function() {
     var field = $(this);
     if (field.val() && field.val().indexOf('://') == -1) {
-      field.val('http://' + field.val());
+      if($('[name="check[type]"]').val()===''){
+        field.val('http://' + field.val());
+      } else {
+        field.val($('[name="check[type]"]').val()+'://'+field.val())
+      }
+    }
+    if(field.val().indexOf('https') !== -1){
+      $('#httpslabel').show();
     }
   });
+  $('#check_form input[name*="url"]').trigger('blur');
 
   $('form select[name="check\\[type\\]"]').bind('change', function() {
     var pollerDetails = $('#pollerDetails');
@@ -162,10 +194,57 @@ $(document).ready(function() {
       .done(function(html) { pollerDetails.html(html); });
   });
 
+
+  $('#pushBullet').click(function () {
+    if ($(this).is(':checked')) {
+      $('[name="check[notifiers][pushbullet][apikey]"]').val('<%= user.notificationSettings.pushbullet.apikey %>')
+    } else {
+      $('[name="check[notifiers][pushbullet][apikey]"]').val('')
+    }
+  });
+  $('[name="check[notifiers][email][value]"]').click(function () {
+    if ($(this).is(':checked')) {
+      $('[name="check[notifiers][email][value]"]').val('<%= user.email %>');
+      $('#extraEmails').show();
+    } else {
+      $('[name="check[notifiers][email][value]').val('');
+      $('#extraEmails').hide();
+    }
+  });
+  <%if(check.notifiers.email){ %>
+    var fillExtraEmail = function() {
+      var emails = '<%= check.notifiers.email.value %>';
+      emails = emails.replace(/^<%= user.email %>,?/, '');
+      if (emails.length > 0) {
+      }
+      $('#extraEmailInput').val(emails);
+      return emails
+    };
+    $('#extraEmails').show();
+    fillExtraEmail();
+  <% } %>
+  $('#check_form').submit(function(e){
+    if($('#extraEmailInput').val().length > 5){
+      $('[name="check[notifiers][email][value]"]').val($('[name="check[notifiers][email][value]"]').val() + ','+$('#extraEmailInput').val())
+    }
+
+    $('[name="check[allowInvalidSSL]"]').val($('[name="check[allowInvalidSSL]"]').val().replace('on','true'))
+
+
+    console.log( $('[name="check[notifiers][email][value]"]').val());
+
+  });
+  $('#extraEmailInput').tagsInput({
+    defaultText:""
+  });
+
   var tagField = $('#check_form textarea[name="check[tags]"]');
   var tags = tagField.val().split(', ');
-  tagField.tagsInput();
-  $('.tagsinput span.tag span').live('click', function() {
+  tagField.tagsInput({
+    autocomplete_url:'/api/tags/search',
+    autocomplete: { autoFocus: true }
+  });
+  $('.tagsinput span.tag span').on('click', function() {
     window.location = '<%= route %>/tags/' + $(this).text();
   });
 });

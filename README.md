@@ -33,12 +33,13 @@ Installing Uptime
 
 Uptime 3.2 requires Node.js 0.10 and MongoDB 2.1. Older versions provide compatibility with Node 0.8 (Uptime v3.1) and 0.6 (Uptime v1.4).
 
-To install from GitHub, clone the repository and install dependencies using `npm`:
+To install from GitHub, clone the repository and install dependencies using `npm` and `bower`:
 
 ```sh
 $ git clone git://github.com/springerpe/uptime.git
 $ cd uptime
 $ npm install
+$ bower install
 ```
 
 Lastly, start the application with:
@@ -59,7 +60,7 @@ $ node models/migrations/upgrade2to3
 Adding Checks
 -------------
 
-By default, the web UI runs on port 8082, so just browse to 
+By default, the web UI runs on port 8082, so just browse to
 
     http://localhost:8082/
 
@@ -76,7 +77,7 @@ url:        'http://localhost:8082'
 mongodb:
   server:   localhost
   database: uptime
-  user:     root 
+  user:     root
   password:
   connectionString:       # alternative to setting server, database, user and password separately
 
@@ -108,6 +109,21 @@ url: 'http://myDomain.com'
 ```
 
 Node that Uptime works great behind a proxy - it uses the `http_proxy` environment variable transparently.
+
+SSL
+---
+
+By default, Uptime uses regular HTTP on the API and monitor server, but it's possible to enable SSL for encrypting the connection to your monitor instance. The settings for this are located in the `config/default.yaml` file:
+
+```yaml
+ssl:
+  enabled:                true
+  certificate:            uptime.crt # path to certificate file
+  key:                    uptime.key # path to key file
+  selfSigned:             false
+```
+
+You must specify `true` for the `selfSigned` option when using a self-signed certificate, otherwise Node.js will throw an "UNABLE_TO_VERIFY_LEAF_NODE" error and will not poll.
 
 Architecture
 ------------
@@ -171,7 +187,7 @@ plugins:
 
 Third-party plugins:
 
- * [`webhooks`](https://github.com/mintbridge/uptime-webhooks): notify events to an URL by sending an HTTP POST request 
+ * [`webhooks`](https://github.com/mintbridge/uptime-webhooks): notify events to an URL by sending an HTTP POST request
  * [`campfire`](https://gist.github.com/dmathieu/5592418): notify events to Campfire
  * [`pushover`](https://gist.github.com/xphyr/5994345): Notify events to mobile devices
 
@@ -234,7 +250,7 @@ Return a list of all checks
 
 Return a list of checks that need a poll (i.e. not paused, plus new or last tested > interval set between tests)
 
-#### `GET /checks/:id`
+#### `GET /checks/:id?apikey=xxxxx`
 
 Return a single check
 
@@ -242,7 +258,7 @@ Parameter :
 
 * `id` : (required) Id of the check
 
-Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004`
+Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004?apikey=xxxxx`
 
 #### `GET /checks/:id/pause`
 
@@ -252,7 +268,7 @@ Parameter :
 
 * `id` : (required) Id of the check
 
-Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/pause`
+Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/pause?apikey=xxxxx`
 
 #### `PUT /check/:id/test`
 
@@ -263,7 +279,7 @@ Parameter :
 
 * `id` : (required) Id of the check
 
-Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/test`
+Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/test?apikey=xxxxx`
 
 #### `GET /pings`
 
@@ -274,13 +290,13 @@ Parameters :
 * `?page=1` : (optional) Paginate results by 50
 * `?check=:id` : (optional) Return only the pings for a given check
 
-Ex: `http://localhost:8082/api/pings?check=527a25bdc9de6e0000000004`
+Ex: `http://localhost:8082/api/pings?check=527a25bdc9de6e0000000004?apikey=xxxxx`
 
-#### `GET /pings/events`
+#### `GET /pings/events?apikey=xxxxx`
 
 Return a list of events (CheckEvent) aggregated by day, limited to the latest week, and to 100 results
 
-#### `POST /pings`
+#### `POST /pings?apikey=xxxxx`
 
 Create a ping for a check, if the check exists and is not already polled
 
@@ -294,11 +310,11 @@ Parameters :
 * `error` : (optional)
 * `details` : (optional)
 
-#### `GET /tags`
+#### `GET /tags?apikey=xxxxx`
 
 Return list of all tags
 
-#### `GET /tags/:name`
+#### `GET /tags/:name?apikey=xxxxx`
 
 Return a single tag
 
@@ -306,9 +322,9 @@ Parameter :
 
 * `name` : (required) name of the tag
 
-Ex: `http://localhost:8082/tags/good`
+Ex: `http://localhost:8082/tags/good?apikey=xxxxx`
 
-#### `DELETE /tags/:name`
+#### `DELETE /tags/:name?apikey=xxxxx`
 
 Return a tag
 
@@ -316,7 +332,7 @@ Parameter :
 
 * `name` : (required) name of the tag
 
-#### `PUT /checks`
+#### `PUT /checks?apikey=xxxxx`
 
 Create a new check and return it
 
@@ -331,7 +347,7 @@ Parameters :
 * `tags` : (optional) list of tags (comma-separated values)
 * `type` : (optional) type of check (auto|http|https|udp)
 
-#### `POST /checks/:id`
+#### `POST /checks/:id?apikey=xxxxx`
 
 Update a check and return it
 
@@ -349,7 +365,7 @@ Parameters :
 
 Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004`
 
-#### `DELETE /checks/:id`
+#### `DELETE /checks/:id?apikey=xxxxx`
 
 Delete a check
 
@@ -357,11 +373,11 @@ Parameters :
 
 * `id` : (required) Id of the check
 
-Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004`
+Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004?apikey=xxxxx`
 
 ### Statistics routes
 
-#### `GET /checks/:id/stat/:period/:timestamp`
+#### `GET /checks/:id/stat/:period/:timestamp?apikey=xxxxx`
 
 Return check stats for a period
 
@@ -371,9 +387,9 @@ Parameters :
    * `period` : (required) Period - values :  `hour`|`day`|`month`|`year`
    * `timestamp` : (required) Start date (timestamp)
 
-Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/stat/day/1383260400000`
+Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/stat/day/1383260400000?apikey=xxxxx`
 
-#### `GET /checks/:id/stats/:type`
+#### `GET /checks/:id/stats/:type?apikey=xxxxx`
 
 Return check stats for a period
 
@@ -384,9 +400,9 @@ Parameters :
 * `?begin=` : (required) Start date (timestamp)
 * `?end=` : (required) End date (timestamp)
 
-Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/stats/month?begin=1383260400000&end=1385852399999`
+Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/stats/month?begin=1383260400000&end=1385852399999?apikey=xxxxx`
 
-#### `GET /tags/:name/checks/:period/:timestamp`
+#### `GET /tags/:name/checks/:period/:timestamp?apikey=xxxxx`
 
 Return tag stats for a period, joined by checks
 
@@ -396,9 +412,9 @@ Parameters :
 * `period` : (required) Period - values :  `hour`|`day`|`month`|`year`
 * `timestamp` : (required) Start date (timestamp)
 
-Ex: `http://localhost:8082/api/tags/good/checks/month/1384816432099`
+Ex: `http://localhost:8082/api/tags/good/checks/month/1384816432099?apikey=xxxxx`
 
-#### `GET /tags/:name/stat/:period/:timestamp`
+#### `GET /tags/:name/stat/:period/:timestamp?apikey=xxxxx`
 
 Return tag stats for a period
 
@@ -408,9 +424,9 @@ Parameters :
 * `period` : (required) Period - values :  `hour`|`day`|`month`|`year`
 * `timestamp` : (required) Start date (timestamp)
 
-Ex: `http://localhost:8082/api/tags/good/stat/month/1383260400000`
+Ex: `http://localhost:8082/api/tags/good/stat/month/1383260400000?apikey=xxxxx`
 
-#### `GET /tags/:name/stats/:type`
+#### `GET /tags/:name/stats/:type?apikey=xxxxx`
 
 Return tag stats for a period
 
@@ -421,11 +437,11 @@ Parameters :
 * `?begin=` : (required) Start date (timestamp)
 * `?end=` : (required) End date (timestamp)
 
-Ex: `http://localhost:8082/api/tags/good/stats/month?begin=1383260400000&end=1385852399999`
+Ex: `http://localhost:8082/api/tags/good/stats/month?begin=1383260400000&end=1385852399999?apikey=xxxxx`
 
 ### Event routes
 
-#### `GET /checks/:id/events`
+#### `GET /checks/:id/events?apikey=xxxxx`
 
 Return the list of all events for the check
 
@@ -433,9 +449,9 @@ Parameter :
 
 * `id` : (required) Id of the check
 
-Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/events`
+Ex: `http://localhost:8082/api/checks/527a25bdc9de6e0000000004/events?apikey=xxxxx`
 
-#### `GET /tags/:name/events`
+#### `GET /tags/:name/events?apikey=xxxxx`
 
 Return the list of all events associated to the tag
 
@@ -445,7 +461,7 @@ Parameter :
 * `?begin=` : (optional) Start date (timestamp)
 * `?end=` : (optional) End date (timestamp)
 
-Ex: `http://localhost:8082/api/tags/good/events?begin=1383260400000&end=1385852399999`
+Ex: `http://localhost:8082/api/tags/good/events?begin=1383260400000&end=1385852399999?apikey=xxxxx`
 
 Support and Discussion
 ----------------------

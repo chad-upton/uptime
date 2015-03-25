@@ -1,4 +1,6 @@
-<h1>Tags <small class="pull-right">last 24 hours</small></h1>
+<h1 class="page-header">
+  <i class="fa fa-tags"></i> Tags <small class="pull-right hidden-xs">last 24 hours</small>
+</h1>
 <% if (info.length) { %>
 <div class="alert alert-success"><%= info %></div>
 <% } %>
@@ -7,7 +9,7 @@
     <tr>
       <th style="width:30%">Name</th>
       <th style="width:20%" title="Percentage of all pings up in the last 24h">Availability</th>
-      <th style="width:35%" title="Outage periods in the last 24h">Uptime</th>
+      <th style="width:35%" title="Outage periods in the last 24h" class="hidden-xs">Uptime</th>
       <th style="width:15%" title="Average response time in the last 24h">Response Time</th>
     </tr>
   </thead>
@@ -20,7 +22,7 @@
 <tr>
   <td data-sort="{{= tag.name }}"><a href="{{= route + '/tags/' + encodeURIComponent(tag.name) }}">{{= tag.name }}</a></td>
   <td data-sort="{{= tag.availability }}">{{= (tag.availability * 100).toFixed(3).replace('.000', '') }}%</td>
-  <td data-sort="{{= tag.availability }}">{{- uptimeBar('tag', {
+  <td data-sort="{{= tag.availability }}" class="hidden-xs">{{- uptimeBar('tag', {
         from: Date.now() - 24 * 60 * 60 * 1000,
         to: Date.now(),
         origin: new Date(tag.firstTested).valueOf(),

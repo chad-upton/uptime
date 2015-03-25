@@ -12,14 +12,15 @@ var Ping = new Schema({
   // for pings in error, more details need to be persisted
   downtime     : Number,   // time since last ping if the ping is down
   error        : String,
-  details      : Schema.Types.Mixed
+  details      : Schema.Types.Mixed,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
 Ping.index({ timestamp: -1 });
 Ping.index({ check: 1 });
 Ping.plugin(require('mongoose-lifecycle'));
 
 Ping.methods.findCheck = function(callback) {
-  return this.db.model('Check').findById(this.check, callback);
+  return this.db.model('Check').findById(this.check, callback).populate('owner', '-pass -date -id');
 };
 
 Ping.methods.setDetails = function(details) {
@@ -30,7 +31,6 @@ Ping.methods.setDetails = function(details) {
 Ping.statics.createForCheck = function(status, timestamp, time, check, monitorName, error, details, callback) {
   timestamp = timestamp || new Date();
   timestamp = timestamp instanceof Date ? timestamp : new Date(parseInt(timestamp, 10));
-
   var ping = new this();
   ping.timestamp = timestamp;
   ping.isUp = status;
@@ -50,6 +50,7 @@ Ping.statics.createForCheck = function(status, timestamp, time, check, monitorNa
   if (details) {
     ping.setDetails(JSON.parse(details));
   }
+  ping.owner = check.owner;
   ping.save(function(err1) {
     if (err1) return callback(err1);
     check.setLastTest(status, timestamp, error);

@@ -14,6 +14,7 @@ var TagMonthlyStat = require('../../models/tagMonthlyStat');
 var CheckMonthlyStat = require('../../models/checkMonthlyStat');
 var moduleInfo = require('../../package.json');
 
+var Account = require('../../models/user/accountManager');
 var app = module.exports = express();
 
 // middleware
@@ -36,6 +37,17 @@ app.configure(function(){
     res.locals.moment = moment;
     next();
   });
+  app.use(function (req, res, next) {
+    res.removeHeader("x-powered-by");
+    next();
+  });
+  app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
+  /*app.use(express.cookieSession({
+    key:    'uptime',
+    secret: 'FZ5HEE5YHD3E566756234C45BY4DSFZ4',
+    proxy:  true,
+    cookie: { maxAge: 60 * 60 * 1000 }
+  }));*/
   app.use(app.router);
   app.set('views', __dirname + '/views');
   app.set('view engine', 'ejs');
@@ -53,33 +65,56 @@ app.configure('production', function(){
 app.locals({
   version: moduleInfo.version
 });
+/*
+ User routes
+ */
+require('./appUser')(app);
+
+//userMiddleware
+var isAuthed = function(req,res,next){
+  Account.isUserAuthed(req,function(user){
+    req.user = user;
+    app.locals.user = user;
+    next();
+  },function(){
+    app.locals.user = false;
+    res.redirect('/dashboard/signout');
+  });
+};
+
+/* End user routes */
 
 // Routes
 
-app.get('/events', function(req, res) {
+app.get('/events', isAuthed, function(req, res) {
   res.render('events');
 });
 
-app.get('/checks', function(req, res, next) {
-  Check.find().sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
+app.get('/checks',isAuthed, function(req, res, next) {
+  Check.find({ owner: req.user._id }).sort({ isUp: 1, lastChanged: -1 }).exec(function(err, checks) {
     if (err) return next(err);
     res.render('checks', { info: req.flash('info'), checks: checks });
   });
 });
 
-app.get('/checks/new', function(req, res) {
-  res.render('check_new', { check: new Check(), pollerCollection: app.get('pollerCollection'), info: req.flash('info') });
+app.get('/checks/new',isAuthed, function(req, res) {
+  var check = new Check();
+  check.notifiers = {};
+  res.render('check_new', { check: check, pollerCollection: app.get('pollerCollection'), info: req.flash('info') });
 });
 
-app.post('/checks', function(req, res, next) {
+app.post('/checks',isAuthed, function(req, res, next) {
   var check = new Check();
   try {
     var dirtyCheck = req.body.check;
-    check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'))
+    dirtyCheck.owner = req.user;
+    check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'));
     app.emit('populateFromDirtyCheck', check, dirtyCheck, check.type);
   } catch (err) {
     return next(err);
   }
+  check.owner = req.user._id;
+  check.notifiers = req.param('notifiers');
   check.save(function(err) {
     if (err) return next(err);
     req.flash('info', 'New check has been created');
@@ -87,25 +122,26 @@ app.post('/checks', function(req, res, next) {
   });
 });
 
-app.get('/checks/:id', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+app.get('/checks/:id',isAuthed, function(req, res, next) {
+  Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
     res.render('check', { check: check, info: req.flash('info'), req: req });
   });
 });
 
-app.get('/checks/:id/edit', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+app.get('/checks/:id/edit',isAuthed, function(req, res, next) {
+  Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return res.send(404, 'failed to load check ' + req.params.id);
     var pollerDetails = [];
     app.emit('checkEdit', check.type, check, pollerDetails);
+    check.notifiers = check.notifiers || {};
     res.render('check_edit', { check: check, pollerCollection: app.get('pollerCollection'), pollerDetails: pollerDetails.join(''), info: req.flash('info'), req: req });
   });
 });
 
-app.get('/pollerPartial/:type', function(req, res, next) {
+app.get('/pollerPartial/:type',isAuthed, function(req, res, next) {
   var poller;
   try {
     poller = app.get('pollerCollection').getForType(req.params.type);
@@ -117,16 +153,23 @@ app.get('/pollerPartial/:type', function(req, res, next) {
   res.send(pollerDetails.join(''));
 });
 
-app.put('/checks/:id', function(req, res, next) {
-  Check.findById(req.params.id, function(err, check) {
+app.put('/checks/:id',isAuthed, function(req, res, next) {
+  Check.findOne({ _id: req.params.id,owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     try {
       var dirtyCheck = req.body.check;
+      dirtyCheck.owner = req.user;
       check.populateFromDirtyCheck(dirtyCheck, app.get('pollerCollection'))
       app.emit('populateFromDirtyCheck', check, dirtyCheck, check.type);
     } catch (populationError) {
       return next(populationError);
     }
+    /*if(check.owner != req.user._id){
+     console.log('Illegal save detected');
+     req.flash('info', 'Changes not saved');
+     res.redirect(app.route + '/checks/' + req.params.id);
+     }*/
+    check.notifiers = req.param('check').notifiers;
     check.save(function(err2) {
       if (err2) return next(err2);
       req.flash('info', 'Changes have been saved');
@@ -135,8 +178,9 @@ app.put('/checks/:id', function(req, res, next) {
   });
 });
 
-app.delete('/checks/:id', function(req, res, next) {
-  Check.findOne({ _id: req.params.id }, function(err, check) {
+
+app.delete('/checks/:id',isAuthed, function(req, res, next) {
+  Check.findOne({ _id: req.params.id, owner: req.user._id }, function(err, check) {
     if (err) return next(err);
     if (!check) return next(new Error('failed to load check ' + req.params.id));
     check.remove(function(err2) {
@@ -147,15 +191,16 @@ app.delete('/checks/:id', function(req, res, next) {
   });
 });
 
-app.get('/tags', function(req, res, next) {
-  Tag.find().sort({ name: 1 }).exec(function(err, tags) {
+app.get('/tags',isAuthed, function(req, res, next) {
+  //{owner: req.user._id}
+  Tag.find({owner: req.user._id}).sort({ name: 1 }).exec(function(err, tags) {
     if (err) return next(err);
     res.render('tags', { info: req.flash('info'), tags: tags });
   });
 });
 
-app.get('/tags/:name', function(req, res, next) {
-  Tag.findOne({ name: req.params.name }, function(err, tag) {
+app.get('/tags/:name',isAuthed, function(req, res, next) {
+  Tag.findOne({ name: req.params.name, owner: req.user._id }, function(err, tag) {
     if (err) {
       return next(err);
     }

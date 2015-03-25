@@ -20,7 +20,8 @@ var Check = new Schema({
   interval    : { type: Number, default: 60000 }, // interval between two pings
   maxTime     : { type: Number, default: 1500 },  // time under which a ping is considered responsive
   alertTreshold : { type: Number, default: 1 },   // nb of errors from which to trigger a new CheckEvent
-  errorCount  : { type: Number, default: 0 },     // count number of errors
+  errorCount  : { type: Number, default: 0 },     // count number of errors,
+  timeout: { type: Number, default: 5000 },
   tags        : [String],
   lastChanged : Date,
   firstTested : Date,
@@ -31,6 +32,10 @@ var Check = new Schema({
   downtime    : { type: Number, default: 0 },
   qos         : {},
   pollerParams : Schema.Types.Mixed,
+  statusHubId : Number,
+  owner: { type: Schema.ObjectId, ref: 'Account' },
+  notifiers: Object,
+  allowInvalidSSL: Boolean
 });
 Check.plugin(require('mongoose-lifecycle'));
 
@@ -94,7 +99,8 @@ Check.methods.setLastTest = function(status, time, error) {
   }
 
   this.lastTested = now;
-
+  this.lastChanged = this.lastChanged || now;
+  var tmplc = this.lastChanged;
   if (this.isUp != status) {
     this.lastChanged = now;
     this.isUp = status;
@@ -108,11 +114,12 @@ Check.methods.setLastTest = function(status, time, error) {
       check: this,
       tags: this.tags,
       message: status ? 'up' : 'down',
-      details: error
+      details: error,
+      owner: this.owner
     });
     if (status && this.lastChanged && this.isUp != undefined) {
       // Check comes back up
-      event.downtime = now.getTime() - this.lastChanged.getTime();
+      event.downtime = now.getTime() - tmplc.getTime();
     }
     event.save();
     this.markEventNotified();
@@ -320,6 +327,8 @@ Check.methods.populateFromDirtyCheck = function(dirtyCheck, pollerCollection) {
   this.isPaused = dirtyCheck.isPaused || this.isPaused;
   this.alertTreshold = dirtyCheck.alertTreshold || this.alertTreshold;
   this.interval = dirtyCheck.interval * 1000 || this.interval;
+  this.timeout = dirtyCheck.timeout * 1000 || this.timeout;
+  this.allowInvalidSSL = dirtyCheck.allowInvalidSSL || false;
 
   if (typeof(dirtyCheck.name) !== 'undefined' && dirtyCheck.name.length) {
       this.name = dirtyCheck.name;
@@ -334,7 +343,37 @@ Check.methods.populateFromDirtyCheck = function(dirtyCheck, pollerCollection) {
   if (typeof(this.url) == 'undefined') {
     throw new Error('URL must be defined');
   }
+  /*if(this.tags){
+    var index=0;
+    var self = this;
+    var handleTag = function(i){
+      var tag = self.tags[i];
+      if(tag == "null"){
+        return;
+      }
+      var nwTag = {
 
+      };
+      nwTag.name = tag;
+      nwTag.owner = dirtyCheck.owner._id;
+      Tag.tagExistFromUser(nwTag,function(e,r){
+        if(!r){
+          Tag.createTagForUser(nwTag,function(){
+            if(index < self.tags.length){
+              index += 1;
+              handleTag(index)
+            }
+          });
+        } else {
+          if(index < self.tags.length){
+            index += 1;
+            handleTag(index)
+          }
+        }
+      });
+    };
+    handleTag(index)
+  }*/
   if (dirtyCheck.type) {
     if (!pollerCollection.getForType(dirtyCheck.type).validateTarget(this.url)) {
       throw new Error('URL ' + this.url + ' and poller type ' + dirtyCheck.type + ' mismatch');
@@ -357,8 +396,8 @@ Check.statics.getAllTags = function(callback) {
   });
 };
 
-Check.statics.findForTag = function(tag, callback) {
-  return this.find().where('tags').equals(tag).exec(callback);
+Check.statics.findForTag = function(owner,tag, callback) {
+  return this.find({owner: owner}).where('tags').equals(tag).exec(callback);
 };
 
 Check.statics.convertTags = function(tags) {
@@ -388,7 +427,7 @@ Check.statics.callForChecksNeedingPoll = function(callback) {
 };
 
 Check.statics.needingPoll = function() {
-  return this.$where(Check.methods.needsPoll);
+  return this.$where(Check.methods.needsPoll).populate('check.owner');
 };
 
 Check.statics.updateAllQos = function(callback) {

@@ -5,17 +5,34 @@
 var Check      = require('../../../models/check');
 var CheckEvent = require('../../../models/checkEvent');
 var Ping       = require('../../../models/ping');
-
+var Account = require('../../../models/user/accountManager');
 /**
  * Check Routes
  */
 module.exports = function(app) {
 
+  /*
+  User middleware
+   */
+  var isUser = function(req,res,next) {
+    Account.isUserAuthed(req,function(user){
+      req.user = user;
+      app.locals.user = user;
+      req.session.user = user;
+      next();
+    }, function () {
+      res.status(403)     // HTTP status 404: NotFound
+        .send('Forbidden');
+      console.log('Something is using an authed route',req.route.path);
+    });
+  };
+
   // support 'check' and 'page' arguments in query string
   app.get('/pings', function(req, res, next) {
-    var query = {};
+    var query = {owner: req.user._id };
     if (req.query.check) {
       query.check = req.query.check;
+
     }
     Ping
     .find(query)
@@ -28,9 +45,9 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/pings/events', function(req, res, next) {
+  app.get('/pings/events', isUser,  function(req, res, next) {
     CheckEvent
-    .find({ timestamp: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) } })
+    .find({ timestamp: { $gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }, owner: req.user._id })
     .sort({ timestamp: -1 })
     .select({ tags: 0 })
     .limit(100)
@@ -42,7 +59,7 @@ module.exports = function(app) {
     });
   });
 
-  app.post('/pings', function(req, res) {
+  app.post('/pings', isUser, function(req, res) {
     Check.findById(req.body.checkId, function(err1, check) {
       if (err1) {
         return res.send(err1.message, 500);

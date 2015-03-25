@@ -11,8 +11,9 @@ var TagHourlyStat = new Schema({
   responseTime   : Number,
   downtime       : Number,
   outages        : Array,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
-TagHourlyStat.index({ name: 1, timestamp: -1 }, { unique: true });
+TagHourlyStat.index({ name: 1, timestamp: -1 });
 TagHourlyStat.plugin(require('mongoose-lifecycle'));
 
 module.exports = mongoose.model('TagHourlyStat', TagHourlyStat);

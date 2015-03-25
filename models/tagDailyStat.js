@@ -11,8 +11,10 @@ var TagDailyStat = new Schema({
   responseTime   : Number,
   downtime       : Number,
   outages        : Array,
+  owner: { type: Schema.ObjectId, ref: 'Account' }
 });
-TagDailyStat.index({ name: 1, timestamp: -1 }, { unique: true });
+TagDailyStat.index({ name: 1, timestamp: -1 });
+TagDailyStat.index({ owner: 1 });
 TagDailyStat.plugin(require('mongoose-lifecycle'));
 
 module.exports = mongoose.model('TagDailyStat', TagDailyStat);

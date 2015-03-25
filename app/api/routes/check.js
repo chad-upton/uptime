@@ -7,14 +7,29 @@ var CheckEvent       = require('../../../models/checkEvent');
 var CheckHourlyStat  = require('../../../models/checkHourlyStat');
 var CheckDailyStat   = require('../../../models/checkDailyStat');
 var CheckMonthlyStat = require('../../../models/checkMonthlyStat');
+var Account = require('../../../models/user/accountManager');
 
 /**
  * Check Routes
  */
 module.exports = function(app) {
 
-  app.get('/checks', function(req, res, next) {
-    var query = {};
+  var isUser = function(req,res,next) {
+    Account.isUserAuthed(req,function(user){
+      req.user = user;
+      app.locals.user = user;
+      req.session.user = user;
+      next();
+    }, function () {
+      res.status(403)     // HTTP status 404: NotFound
+        .send('Forbidden');
+      console.log('Something is using an authed route',req.route.path);
+    });
+  };
+
+
+  app.get('/checks',isUser, function(req, res, next) {
+    var query = {owner: req.user._id };
     if (req.query.tag) {
       query.tags = req.query.tag;
     }
@@ -30,12 +45,14 @@ module.exports = function(app) {
   app.get('/checks/needingPoll', function(req, res, next) {
     Check
     .needingPoll()
-    .select({qos: 0})
+    .select({qos: 0}).populate('owner','apiKeys')
     .exec(function(err, checks) {
       if (err) return next(err);
       res.json(checks);
     });
   });
+
+
 
   // check route middleware
   var loadCheck = function(req, res, next) {
@@ -50,11 +67,13 @@ module.exports = function(app) {
     });
   };
 
-  app.get('/checks/:id', loadCheck, function(req, res, next) {
+
+
+  app.get('/checks/:id',isUser, loadCheck, function(req, res, next) {
     res.json(req.check);
   });
-  
-  app.get('/checks/:id/pause', loadCheck, function(req, res, next) {
+
+  app.get('/checks/:id/pause',isUser, loadCheck, function(req, res, next) {
     req.check.togglePause();
     req.check.save(function(err) {
       if (err) return next(new Error('failed to toggle pause on check' + req.params.id));
@@ -62,6 +81,7 @@ module.exports = function(app) {
         timestamp: new Date(),
         check: req.check,
         tags: req.check.tags,
+        owner: req.check.owner,
         message: req.check.isPaused ? 'paused' : 'restarted'
       }).save();
       res.redirect(app.route + '/checks/' + req.params.id);
@@ -75,23 +95,25 @@ module.exports = function(app) {
     });
   });
 
-  app.get('/checks/:id/stat/:period/:timestamp', loadCheck, function(req, res, next) {
+  app.get('/checks/:id/stat/:period/:timestamp', isUser, loadCheck, function(req, res, next) {
     req.check.getSingleStatForPeriod(req.params.period, new Date(parseInt(req.params.timestamp)), function(err, stat) {
       if (err) return next(err);
+      stat = stat || []
       res.json(stat);
     });
   });
-  
-  app.get('/checks/:id/stats/:type', loadCheck, function(req, res, next) {
+
+  app.get('/checks/:id/stats/:type',isUser, loadCheck, function(req, res, next) {
     req.check.getStatsForPeriod(req.params.type, req.query.begin, req.query.end, function(err, stats) {
       if(err) return next(err);
       res.json(stats);
     });
   });
-  
-  app.get('/checks/:id/events', function(req, res, next) {
+
+  app.get('/checks/:id/events',isUser, function(req, res, next) {
     var query = {
       check: req.params.id,
+      owner: req.user._id,
       timestamp: { $gte: req.query.begin || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) }
     };
     if (req.query.end) {
