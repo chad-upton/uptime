@@ -4,7 +4,7 @@
 
 if (process.argv.length == 3) {
 	var _env = process.argv[2];
-	if(process.argv[2].length){
+	if(_env.length){
 	    process.env.NODE_ENV = _env;
 	}
 }
