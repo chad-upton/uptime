@@ -1,8 +1,8 @@
 {
-  "name":    "node-uptime",
+  "name":    "springer-uptime",
   "description": "Remote monitoring for HTTP applications",
-  "version": "3.2.0",
-  "author": "Francois Zaninotto",
+  "version": "4.0.1",
+  "author": "Francois Zaninotto and Springer PE",
   "dependencies": {
     "mongoose":  "3.6.7",
     "mongoose-lifecycle": "1.0.0",
@@ -18,14 +18,16 @@
     "nodemailer": "0.3.35",
     "net-ping":  "1.1.7",
     "js-yaml": "2.1.0",
-    "webpagetest": "0.2.0"
+    "webpagetest": "0.2.0",
+    "request": "2.53.0"
   },
   "devDependencies": {
     "mocha": "1.7.x",
-    "should": "1.1.0"
+    "should": "1.1.0",
+    "nodemon": "1.2.1"
   },
   "keywords": ["uptime", "monitoring", "api", "check"],
-  "repository": "https://github.com/fzaninotto/uptime",
+  "repository": "https://github.com/springerpe/uptime",
   "license": "MIT",
   "engines": {
     "node": "0.10.x",
@@ -33,6 +35,6 @@
   },
   "scripts": {
     "test": "node_modules/.bin/mocha test/lib/",
-    "start": "node app.js"
+    "start": "nodemon app.js"
   }
 }
