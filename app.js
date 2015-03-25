@@ -47,6 +47,7 @@ if (config.ssl && config.ssl.enabled === true) {
 }
 
 app.configure(function(){
+  app.disable('x-powered-by');
   app.use(express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4'));
   app.use(express.cookieSession({
     key:    'uptime',
