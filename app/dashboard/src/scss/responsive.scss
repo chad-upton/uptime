@@ -1,0 +1,30 @@
+@media screen and (max-width: 767px) {
+
+    .affix, .affix-top {
+        position: relative !important;
+        top: auto !important;
+        width: 100% !important;
+    }
+
+    #secondaryNav {
+        display: block;
+        width: 100%;
+        margin-top: 16px;
+    }
+
+    #dateNavigation {
+        .zoom {
+            margin: 8px 0;
+        }
+    }
+
+    #sectionList section {
+        padding-top: 32px;
+    }
+
+    h1 .check-overview {
+        position: relative;
+        margin-top: 16px;
+    }
+
+}

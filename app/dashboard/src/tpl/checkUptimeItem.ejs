@@ -1,0 +1,15 @@
+<tr>
+    <td class="name">
+        <a href="<%=  route + '/checks/' + stat.check._id +'?type=' + type + '&date=' + date %>"><%= stat.check.name %></a>
+        <a href="<%= stat.check.url %>" target="_blank"><i class="fa fa-external-link"></i></a>
+    </td>
+    <td>
+        <%- uptimeBar('check', {
+                from: begin,
+                to: end,
+                periods: stat.outages || [],
+                check: stat.check
+            })
+        %>
+    </td>
+</tr>

@@ -2,187 +2,81 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+
     <title>Uptime</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
-    <link rel="stylesheet" href="<%= route %>/vendor/bootstrap/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="<%= route %>/vendor/fontawesome/css/font-awesome.min.css">
-    <link rel="stylesheet" href="<%= route %>/stylesheets/style.css">
-    <link rel="shortcut icon" href="<%= route %>/favicon.ico">
-    <link rel="apple-touch-icon" href="<%= route %>/apple-touch-icon.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="<%= route %>/apple-touch-icon-ipad.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="<%= route %>/apple-touch-icon-iphone4.png">
+
+    <link id="favicon" rel="shortcut icon" href="<%= route %>/img/favicon.ico">
+    <link rel="apple-touch-icon" href="<%= route %>/img/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="<%= route %>/img/apple-touch-icon-ipad.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="<%= route %>/img/apple-touch-icon-iphone4.png">
+
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="<%= route %>/css/style.css">
     <%- renderCssTags(addedCss) %>
-    <script src="<%= route %>/vendor/jquery/dist/jquery.min.js"></script>
-    <script src="<%= route %>/javascripts/bootstrap.min.js"></script>
-    <script src="<%= route %>/javascripts/jquery-ui.autocomplete.min.js"></script>
-    <% if(typeof user ==="object"){ %>
-      <script src="/socket.io/socket.io.js"></script>
-      <script>
-      var socket = io.connect(location.protocol + '//' + location.hostname);
-      </script>
-    <% } %>
-    <script src="<%= route %>/vendor/moment/min/moment.min.js"></script>
-    <!--[if lt IE 9]>
-    <script src="http://raw.github.com/aFarkas/html5shiv/master/src/html5shiv.js"></script>
-    <script src="http://raw.github.com/kriskowal/es5-shim/master/es5-shim.js"></script>
-    <script src="http://raw.github.com/kriskowal/es5-shim/master/es5-sham.js"></script>
-    <script type="text/javascript" src="path/to/flashcanvas.js"></script>
-    <![endif]-->
+
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+    var socket = io.connect(location.protocol + '//' + location.hostname);
+    </script>
+
+    <script src="<%= route %>/js/templates.js"></script>
+    <script src="<%= route %>/js/scripts.js"></script>
   </head>
   <body>
-    <!--div class="navbar navbar-inverse navbar-fixed-top">
-      <div class="navbar-inner">
-        <div class="container">
-          <div class="navbar-header">
-            <a class="navbar-brand" href="<%= route %>/events">Uptime</a>
-          </div>
-          <ul class="nav navbar-nav">
-            <li><a href="<%= route %>/events">Events</a></li>
-            <li><a href="<%= route %>/checks">Checks</a></li>
-            <li><a href="<%= route %>/tags">Tags</a></li>
-            <li id="new_events"><a href="<%= route %>/events?highlightFrom=<%= Date.now() %>"></a></li>
-          </ul>
-          <ul class="nav navbar-nav navbar-right" id="check_summary">
-            <li id="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
-            <li id="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
-          </ul>
-        </div>
-      </div>
-    </div-->
-    <nav class="navbar-inverse navbar-default">
-      <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
+    <nav class="navbar navbar-inverse navbar-static-top">
+      <div class="container">
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar-collapse-1">
             <span class="sr-only">Toggle navigation</span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Uptime <sup>on steroids</sup></a>
-          <% if(typeof user ==="object"){ %>
-            <ul class="nav navbar-nav pull-right visible-xs check_summary">
-              <li class="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
-              <li class="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
-            </ul>
-          <% } %>
+          <a class="navbar-brand" href="<%= route %>/events">Uptime</a>
         </div>
 
-        <!-- Collect the nav links, forms, and other content for toggling -->
-        <% if(typeof user ==="object"){ %>
-          <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-            <ul class="nav navbar-nav">
-              <li><a href="<%= route %>/events">Events</a></li>
-              <li><a href="<%= route %>/checks">Checks</a></li>
-              <li><a href="<%= route %>/tags">Tags</a></li>
-              <!--li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Dropdown <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                  <li><a href="#">Action</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li class="divider"></li>
-                  <li><a href="#">Separated link</a></li>
-                  <li class="divider"></li>
-                  <li><a href="#">One more separated link</a></li>
-                </ul>
-              </li-->
-            </ul>
-            <ul class="nav navbar-nav navbar-right">
-                <li class="dropdown">
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false"><%= user.user%> <span class="caret"></span></a>
-                <ul class="dropdown-menu" role="menu">
-                  <li><a href="<%= route %>/settings">Account settings</a></li>
-                  <li><a href="#">Another action</a></li>
-                  <li><a href="#">Something else here</a></li>
-                  <li class="divider"></li>
-                  <li><a href="<%= route %>/signout">Logout</a></li>
-                </ul>
-              </li>
-            </ul>
+        <div class="collapse navbar-collapse" id="bs-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li><a href="<%= route %>/events">Events</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Checks
+                <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="<%= route %>/checks/new">New</a></li>
+                <li><a href="<%= route %>/checks">List</a></li>
+              </ul>
+            </li>
+            <li><a href="<%= route %>/tags">Tags</a></li>
+            <li id="new_events"><a href="<%= route %>/events?highlightFrom=<%= Date.now() %>"></a></li>
+          </ul>
 
-            <ul class="nav navbar-nav navbar-right check_summary hidden-xs">
-              <li class="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="green">0</strong></li>
-              <li class="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="red">0</strong></li>
-            </ul>
-          </div><!-- /.navbar-collapse -->
-        <% } %>
-      </div><!-- /.container-fluid -->
+          <ul class="nav navbar-nav pull-right" id="check_summary">
+            <li id="all_up" style="display:none;"><span class="label label-success">Up</span><strong class="text-success">0</strong></li>
+            <li id="all_down" style="display: none;"><span class="label label-danger">Down</span><strong class="text-danger">0</strong></li>
+          </ul>
+        </div>
+      </div>
     </nav>
-    <section class="container">
-      <%- body %>
+
+    <section role="main">
+      <div class="container">
+        <%- body %>
+      </div>
     </section>
-    <footer class="footer">
+    <footer id="mainFooter">
       <div class="container">
         <p class="pull-right"><a href="#">Back to top</a></p>
-        <p><a href="https://github.com/brantje/uptime">Uptime <sup>on steroids</sup> <%= version %></a> heavly modded by brantje, powered by <a href="http://nodejs.org/">Node.js</a>, <a href="http://www.mongodb.org/">MongoDB</a>, and <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>.</p>
-        <p>Code licensed under the <a href="https://raw.github.com/brantje/uptime/master/LICENSE">MIT License</a>. Check the <a href="https://github.com/brantje/uptime">Uptime GitHub repository</a> regularly for updates.
+        <p>
+          <a href="https://github.com/fzaninotto/uptime">Uptime <%= version %></a>, powered by <a href="http://nodejs.org/">Node.js</a>, <a href="http://www.mongodb.org/">MongoDB</a>, and <a href="http://twitter.github.com/bootstrap/">Bootstrap</a>.<br />
+          Code licensed under the <a href="https://raw.github.com/fzaninotto/uptime/master/LICENSE">MIT License</a>. Check the <a href="https://github.com/fzaninotto/uptime">Uptime GitHub repository</a> regularly for updates.
       </div>
     </footer>
-    <% if(typeof user ==="object"){ %>
-      <script>
-      var user = <%- JSON.stringify(user) %>
-      var nbNewEvents = 0;
-      var loadedAt = new Date();
-      $(document).ready(function() {
-        $( document ).ajaxError(function(event,xhr,settings,error) {
-          /*console.log('Ajax error:')
-          console.log(event,xhr,settings,error);*/
-          if(xhr.status === 403 && window.location.pathname !== '/dashboard/login'){
-            //window.location.href = "<%= route %>/signout";
-          }
-        });
-        var changeFavicon = function(red) {
-          $('head link[rel="shortcut icon"]').remove()
-          $('head').append('<link rel="shortcut icon" type="image/x-icon" href="/dashboard/favicon' + (red ? '_red' : '') + '.ico">')
-        }
-        var updateCounts = function() {
-          $.getJSON('/api/checks/count', function(count) {
-            if (count.total > 0) {
-              $('.all_up').show().children('strong').text(count.up);
-            } else {
-              $('.all_up').hide();
-            }
-            if (count.down > 0) {
-              $('.all_down').show().children('strong').text(count.down);
-              changeFavicon(true);
-            } else {
-              $('.all_down').hide();
-              if (nbNewEvents > 0) {
-                changeFavicon(false);
-              }
-            }
-            if (nbNewEvents > 0 && !isActive) {
-              document.title = '(' + nbNewEvents +') Uptime';
-            };
-          });
-        };
-        socket.on('CheckEvent', function(data) {
-          if(data.owner != user._id){
-            return;
-          }
-          nbNewEvents++;
-          updateCounts();
-          $('.check_summary').fadeOut().fadeIn().fadeOut().fadeIn();
-          if(!isActive){
-            $('#new_events a').html(nbNewEvents + ' new event' + (nbNewEvents > 1 ? 's' : '') + ' since ' + moment(loadedAt).format('LLL'));
-          }
-        });
-        updateCounts();
-
-        var isActive = true;
-
-        window.onfocus = function () {
-          isActive = true;
-          nbNewEvents = 0;
-          document.title = 'Uptime';
-        };
-
-        window.onblur = function () {
-          isActive = false;
-        };
-      });
-      </script>
-  <% } %>
   </body>
 </html>

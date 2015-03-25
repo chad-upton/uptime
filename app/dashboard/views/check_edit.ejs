@@ -1,34 +1,32 @@
-<script src="<%= route %>/javascripts/checkState.js"></script>
-<div style="float: right;">
+<h1>
+  <span class="faded">Edit Check</span> <%= check.name %>
 
-</div>
-<h1 class="page-header">
-  <div class="pull-right">
-    <small id="check_24h"></small>
+  <div class="check-overview">
+    <span id="check_24h"></span>
   </div>
-  Edit check "<%= check.name %>"
-  <a href="<%= check.url %>" target="_blank"><img src="<%= route %>/images/external-link-ltr-icon.png"></a>
 </h1>
 <% if (info.length) { %>
 <div class="alert alert-success"><%= info %></div>
 <% } %>
-<%- partial('_check_details', { check: check, pollerCollection: pollerCollection, pollerDetails: pollerDetails, route: route, isNewCheck: true }) %>
-<div>
-</div>
+<%- partial('_check_details', { check: check, pollerCollection: pollerCollection, pollerDetails: pollerDetails, route: route }) %>
+<div></div>
+
 <script>
-jQuery(document).ready(function($) {
+jQuery(function($) {
   // highlight current section in main nav
-  $('.navbar-inner li').eq(1).addClass('active');
+  activateMenu(1);
 
   // update check state live
   updateCheckState(<%- JSON.stringify(check) %>);
   socket.on('CheckEvent', function() {
     $.getJSON('/api/checks/<%= check._id %>', updateCheckState);
   });
-  
+
   // manage pause
-  $('span[name="pause"]').click(function(e) {
-    var button = $(this).children();
+  $('a[name="pause"]').click(function(e) {
+    e.preventDefault();
+
+    var button = $(this).children('i');
     $.getJSON('/api/checks/<%= check._id %>/pause', function() {
       if(button.hasClass('fa-pause')) {
         button.removeClass('fa-pause');
@@ -38,7 +36,6 @@ jQuery(document).ready(function($) {
         button.addClass('fa-pause');
       }
     });
-    e.preventDefault();
   });
 
 });

@@ -1,0 +1,9 @@
+<tr class="<%= (stat.availability < 100) ? 'text-danger' : (stat.responsiveness < 100) ? 'text-warning' : '' %><%= ['0','6'].indexOf(moment(stat.timestamp).format('d')) !== -1 ? ' week-end' : '' %>">
+    <td title="<%= new Date(stat.timestamp) %>">
+        <a href="#" class="date" data-type="<%= subType %>" data-date="<%= stat.timestamp %>"><%= moment(stat.timestamp).format(dateFormat) %></a>
+    </td>
+    <td><%= stat.availability.replace('.000', '') %>%</td>
+    <td title="<%= stat.downtime %>s"><%= stat.downtime == 0 ? '' : stat.downtime < 300 ? stat.downtime + 's' : moment.duration(stat.downtime, 'seconds').humanize() %></td>
+    <td><%= stat.responsiveness.replace('.000', '') %>%</td>
+    <td><%= stat.responseTime %>ms</td>
+</tr>
