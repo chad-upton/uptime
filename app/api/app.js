@@ -51,49 +51,54 @@ var isUser = function(req,res,next) {
   });
 };
 
-  app.get('/checks/count', isUser, function (req, res, next) {
-    var count = {up: 0, down: 0, paused: 0, total: 0};
+// cors
+app.all('/*', function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  next();
+});
 
-    Check
-      .find({owner: req.user._id})
-      .select({isUp: 1, isPaused: 1})
-      .exec(function (err, checks) {
-        if (err) return callback(err);
-        checks.forEach(function (check) {
-          //if(check.owner.toString() !=user._id.toString) return;
-          count.total++;
-          if (check.isPaused) {
-            count.paused++;
-          } else if (check.isUp) {
-            count.up++;
-          } else {
-            count.down++;
-          }
-        });
-        res.json(count);
+app.get('/checks/count', isUser, function (req, res, next) {
+  var count = {up: 0, down: 0, paused: 0, total: 0};
+
+  Check
+    .find({owner: req.user._id})
+    .select({isUp: 1, isPaused: 1})
+    .exec(function (err, checks) {
+      if (err) return callback(err);
+      checks.forEach(function (check) {
+        //if(check.owner.toString() !=user._id.toString) return;
+        count.total++;
+        if (check.isPaused) {
+          count.paused++;
+        } else if (check.isUp) {
+          count.up++;
+        } else {
+          count.down++;
+        }
       });
-  });
-
+      res.json(count);
+    });
+});
 
 // Routes
-
-  require('./routes/check')(app);
-  require('./routes/tag')(app);
-  require('./routes/ping')(app);
-  require('./routes/user')(app);
+require('./routes/check')(app);
+require('./routes/tag')(app);
+require('./routes/ping')(app);
+require('./routes/user')(app);
 
 // route list
-  app.get('/', function (req, res) {
-    var routes = [];
-    for (var verb in app.routes) {
-      app.routes[verb].forEach(function (route) {
-        routes.push({method: verb.toUpperCase(), path: app.route + route.path});
-      });
-    }
-    res.json(routes);
-  });
-
-  if (!module.parent) {
-    app.listen(3000);
-    console.log('Express started on port 3000');
+app.get('/', function (req, res) {
+  var routes = [];
+  for (var verb in app.routes) {
+    app.routes[verb].forEach(function (route) {
+      routes.push({method: verb.toUpperCase(), path: app.route + route.path});
+    });
   }
+  res.json(routes);
+});
+
+if (!module.parent) {
+  app.listen(3000);
+  console.log('Express started on port 3000');
+}
