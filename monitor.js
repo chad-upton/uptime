@@ -1,3 +1,10 @@
+if (!process.env.NODE_ENV && process.argv.length == 3) {
+	var _env = process.argv[2];
+	if(process.argv[2].length){
+	    process.env.NODE_ENV = _env;
+	}
+}
+
 var fs      = require('fs');
 var config  = require('config');
 var Monitor = require('./lib/monitor');

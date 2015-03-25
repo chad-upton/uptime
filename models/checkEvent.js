@@ -38,7 +38,8 @@ CheckEvent.statics.aggregateEventsByDay = function(events, callback) {
       delete event.__v;
       delete event._id;
       if (event.message == 'up') {
-        delete event.details;
+      	// I still want to show details if it was up
+        //delete event.details;
       }
       events[index] = event;
     });

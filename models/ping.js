@@ -5,6 +5,7 @@ var Ping = new Schema({
   timestamp    : { type: Date, default: Date.now },
   isUp         : Boolean,  // false if ping returned a non-OK status code or timed out
   isResponsive : Boolean,  // true if the ping time is less than the check max time
+  isSmall    : Boolean,
   time         : Number,
   check        : { type: Schema.ObjectId, ref: 'Check' },
   tags         : [String],
@@ -52,8 +53,22 @@ Ping.statics.createForCheck = function(status, timestamp, time, check, monitorNa
     ping.downtime = check.interval || 60000;
     ping.error = error;
   }
+  ping.isSmall = false;
   if (details) {
-    ping.setDetails(JSON.parse(details));
+  	var _details = JSON.parse(details);
+    ping.setDetails(_details);
+    if(typeof _details.length != 'undefined'){
+
+    	//Are we less than 1 byte?
+    	ping.isSmall = _details.length < (check.smallSize || 1000);
+
+    	if(ping.isSmall){
+    		if(!error){
+    			error = "";
+    		}
+    		error += (error.length ? " & " : "" ) + "Response size is too small";
+    	}
+    }
   }
   ping.owner = check.owner;
   ping.save(function(err1) {
