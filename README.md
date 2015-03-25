@@ -332,7 +332,7 @@ Parameter :
 
 * `name` : (required) name of the tag
 
-#### `PUT /checks?apikey=xxxxx`
+#### `POST /checks?apikey=xxxxx`
 
 Create a new check and return it
 
@@ -347,7 +347,7 @@ Parameters :
 * `tags` : (optional) list of tags (comma-separated values)
 * `type` : (optional) type of check (auto|http|https|udp)
 
-#### `POST /checks/:id?apikey=xxxxx`
+#### `PUT /checks/:id?apikey=xxxxx`
 
 Update a check and return it
 

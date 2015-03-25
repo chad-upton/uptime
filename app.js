@@ -21,6 +21,9 @@ var cookieParser = express.cookieParser('Z5V45V6B5U56B7J5N67J5VTH345GC4G5V4');
 var connect = require('connect');
 var spdy = require('spdy');
 // database
+process.on('uncaughtException', function(err) {
+  console.error('Caught exception: ' + err);
+});
 
 var mongoose   = require('./bootstrap');
 
