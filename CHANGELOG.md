@@ -43,8 +43,8 @@ To be released
 * added Docker and fig support
 
 
-2013-04-22, v3.1
-----------------
+2013-04-22, v3.2.0
+------------------
 
 * Update README.md
 * Use Url as Check name when left empty
@@ -57,20 +57,16 @@ To be released
 * Add email plugin
 * Added uptime version in the footer
 
-2012-12-07, v3.0
-----------------
+2012-12-07, v3.0.0
+------------------
 
 * Uptime bars
 * Exact availability calculation
 * New stats page and date navigation
-* Replaced Highcharts by Flotr2 for charts. No more licence problem!
+* Replaced Highcharts by Flotr2 for charts. No more license problem!
 * Upgraded to Twitter Bootstrap V2
 * Many tweaks in the GUI
 * Heavy refactoring
-
-2012-12-07, v2.0
-----------------
-
 * Moved Mongo initialization to a dedicated bootstrap file
 * Added support for setting the full MongoDB connection string in the config file
 * Fixed engine requirement in package.json
@@ -86,15 +82,15 @@ To be released
 * Bumped main dependencies (Express and Mongoose) to v3. This lead to some refactoring in the model classes.
 * Switched to local jQuery to avoid networking issue
 
-2012-09-19, v1.4
-----------------
+2012-09-19, v1.4.0
+------------------
 
 * This is the last release compatible with Node 0.6.
 * New events appear as such when watching event list
 * Added favicon. The favicon turns red when at least one check is down.
 
-2012-08-05, v1.3
-----------------
+2012-08-05, v1.3.0
+------------------
 
 * Added a User-Agent header to both http and https pollers, to identify pings from the monitor in server logs; you can override the header via configuration
 * Fixed "Save and add" redirection
@@ -110,8 +106,8 @@ To be released
 * Added a Reports tab for tags, offering easily accessible monthly reports
 * Made tabs compatible with direct links and back button in tag and check view
 
-2012-04-21, v1.2
-----------------
+2012-04-21, v1.2.0
+------------------
 
 * Ping list is now updated in real time
 * Added 'Save and add' button in new check form to facilitate batch check creation
@@ -122,14 +118,14 @@ To be released
 * Fixed failure to add check in the dashboard when the protocol wasn't set
 * Added UDP poller (bolgovr)
 
-2012-04-10, v1.1
-----------------
+2012-04-10, v1.0.1
+------------------
 
 * Add support for HTTPS checks
 * Refactor poller class to allow adapter pattern. Opens the door for UDP, FTP, complete page... check types.
 * Removed proxy configuration (now uses environment variables)
 
-2012-03-28, v1.0
-----------------
+2012-03-28, v1.0.0
+------------------
 
 * Initial version
