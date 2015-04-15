@@ -19,7 +19,7 @@
  * Example curl to get all components: curl https://api.statuspage.io/v1/pages/2jzl9rbhcvzm/components.json -H "Authorization: OAuth fa10491960d2fa26cfd823fae332026a2a4df19996505a119677874ab3e30a83"
  */
 var CheckEvent = require('../../models/checkEvent');
-var spore = require('spore');
+var spore      = require('spore');
 var fs         = require('fs');
 var ejs        = require('ejs');
 
@@ -30,12 +30,12 @@ exports.initWebApp = function(options) {
 
   var config = options.config.statuspage;
   var status = spore.createClient({
-    "base_url" : config.endpoint,
+    "base_url" : options.config.endpoint,
     "methods" : {
       "availability" : {
-        "path" : "/" + config.pageid + "/components/:serviceId"+".json",
+        "path" : "/" + options.config.pageid + "/components/:serviceId"+".json",
         "method" : "PATCH",
-        "headers" : {"Authorization": "OAuth "+config.apiKey,
+        "headers" : {"Authorization": "OAuth "+options.config.apiKey,
                       "Content-Type": "application/x-www-form-urlencoded"}
       }
     }
